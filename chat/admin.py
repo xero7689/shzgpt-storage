@@ -19,7 +19,7 @@ class ChatAdmin(admin.ModelAdmin):
         'id',
         'created_at',
         'chatroom',
-        'character',
+        'role',
         'tokens',
         'content'
     ]

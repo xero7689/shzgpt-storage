@@ -18,7 +18,7 @@ class ChatRoom(models.Model):
         return self.name
 
 class Chat(models.Model):
-    character = models.CharField(max_length=32)
+    role = models.CharField(max_length=32)
 
     content = models.TextField()
 
@@ -54,9 +54,11 @@ class Prompt(models.Model):
         on_delete=models.CASCADE
     )
 
+    name = models.CharField(unique=True, max_length=128)
+
     content = models.TextField()
 
-    usage_count = models.IntegerField()
+    usage_count = models.IntegerField(default=0)
 
     created_at = models.DateTimeField(
         auto_now_add=True,
