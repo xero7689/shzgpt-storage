@@ -9,7 +9,8 @@ class ChatRoomAdmin(admin.ModelAdmin):
     list_display = [
         'id',
         'name',
-        'created_at'
+        'created_at',
+        'last_used_time',
     ]
 
 

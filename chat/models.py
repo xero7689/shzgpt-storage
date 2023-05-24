@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.utils import timezone
 
 
 class ChatRoom(models.Model):
@@ -14,8 +15,14 @@ class ChatRoom(models.Model):
         verbose_name='Topic Created Date'
     )
 
+    last_used_time = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Last Use Time'
+    )
+
     def __str__(self):
         return self.name
+
 
 class Chat(models.Model):
     role = models.CharField(max_length=32)
@@ -34,6 +41,15 @@ class Chat(models.Model):
         verbose_name='Topic Created Date'
     )
 
+    def save(self, *args, **kwargs):
+        # Update the last_updated attribute of the related ChatRoom
+        self.chatroom.last_used_time = timezone.now()
+        self.chatroom.save()
+
+        # Call the original save() method to save the Chat object
+        super(Chat, self).save(*args, **kwargs)
+
+
 class PromptTopic(models.Model):
     name = models.CharField(
         unique=True,
@@ -48,9 +64,10 @@ class PromptTopic(models.Model):
     def __str__(self):
         return self.name
 
+
 class Prompt(models.Model):
     prompt_topic = models.ForeignKey(
-        PromptTopic, 
+        PromptTopic,
         on_delete=models.CASCADE
     )
 
