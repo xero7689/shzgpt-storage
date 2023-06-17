@@ -1,10 +1,26 @@
 import uuid
 
 from django.db import models
+from django.conf import settings
 from django.utils import timezone
 
 
+class ChatUser(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL,
+                                on_delete=models.PROTECT)
+    name = models.CharField(max_length=64)
+    apiKey = models.CharField(max_length=256, blank=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Topic Created Date'
+    )
+
+    def __str__(self):
+        return self.name
+
+
 class ChatRoom(models.Model):
+    owner = models.ForeignKey(ChatUser, on_delete=models.PROTECT)
     name = models.CharField(
         unique=True,
         max_length=128
@@ -17,7 +33,7 @@ class ChatRoom(models.Model):
 
     last_used_time = models.DateTimeField(
         auto_now_add=True,
-        verbose_name='Last Use Time'
+        verbose_name='Last Used Time'
     )
 
     def __str__(self):
