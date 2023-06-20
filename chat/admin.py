@@ -1,8 +1,9 @@
 from django.contrib import admin
 
-from .models import ChatUser, ChatRoom, Chat, PromptTopic, Prompt
+from .models import ChatUser, ChatRoom, Chat, PromptTopic, Prompt, APIKey, AIVendor, AIModel
 
 # Register your models here.
+
 
 @admin.register(ChatUser)
 class ChatUserAdmin(admin.ModelAdmin):
@@ -11,6 +12,35 @@ class ChatUserAdmin(admin.ModelAdmin):
         'name',
         'created_at',
     ]
+
+
+@admin.register(AIVendor)
+class AIVendor(admin.ModelAdmin):
+    list_display = [
+        'id',
+        'name'
+    ]
+
+
+@admin.register(AIModel)
+class AIModel(admin.ModelAdmin):
+    list_display = [
+        'id',
+        'name',
+        'vendor',
+    ]
+
+
+@admin.register(APIKey)
+class APIKey(admin.ModelAdmin):
+    list_display = [
+        'id',
+        'owner',
+        'model',
+        'desc',
+        'created_at'
+    ]
+
 
 @admin.register(ChatRoom)
 class ChatRoomAdmin(admin.ModelAdmin):
@@ -40,6 +70,7 @@ class PromptTopicAdmin(admin.ModelAdmin):
     list_display = [
         'id',
         'name',
+        'owner',
         'created_at'
     ]
 

@@ -9,7 +9,6 @@ class ChatUser(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL,
                                 on_delete=models.PROTECT)
     name = models.CharField(max_length=64)
-    apiKey = models.CharField(max_length=256, blank=True)
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Topic Created Date'
@@ -17,6 +16,33 @@ class ChatUser(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class AIVendor(models.Model):
+    name = models.CharField(max_length=64)
+
+    def __str__(self):
+        return self.name
+
+class AIModel(models.Model):
+    name = models.CharField(max_length=128)
+    vendor = models.ForeignKey(AIVendor, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+class APIKey(models.Model):
+    owner = models.ForeignKey(ChatUser, on_delete=models.CASCADE)
+    key = models.CharField(max_length=256)
+    desc = models.CharField(max_length=256, blank=True)
+    model = models.ForeignKey(AIModel, on_delete=models.CASCADE, null=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Topic Created Date'
+    )
+
+    def __str__(self):
+        return self.key
 
 
 class ChatRoom(models.Model):
@@ -67,6 +93,8 @@ class Chat(models.Model):
 
 
 class PromptTopic(models.Model):
+    owner = models.ForeignKey(ChatUser, on_delete=models.PROTECT)
+
     name = models.CharField(
         unique=True,
         max_length=128
