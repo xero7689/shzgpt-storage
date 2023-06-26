@@ -1,8 +1,11 @@
+import json
 import logging
 
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
+
+from chat.models import ChatUser
 
 class CustomLoginViewTestCase(TestCase):
     def setUp(self):
@@ -10,6 +13,8 @@ class CustomLoginViewTestCase(TestCase):
         self.username = 'testuser'
         self.password = 'testpass'
         self.user = User.objects.create_user(username=self.username, password=self.password)
+        self.chat_user = ChatUser.objects.create(
+            user=self.user, name='test-chat-user')
 
     def test_valid_login(self):
         # Create a test client and make a POST request to the login view
@@ -17,7 +22,8 @@ class CustomLoginViewTestCase(TestCase):
         response = client.post(reverse('login'), {'username': self.username, 'password': self.password})
 
         # Assert that the user is authenticated and the response is 'Logged in'
-        self.assertTrue(response.content.decode().startswith('Logged in'))
+        response_json = json.loads(response.content.decode())
+        self.assertEqual(response_json['status'], 'success')
         self.assertEqual(response.status_code, 200)
 
     def test_invalid_username(self):
@@ -45,5 +51,6 @@ class CustomLoginViewTestCase(TestCase):
         response = client.post(reverse('login'), {'username': 'invaliduser', 'password': 'invalidpass'})
 
         # Assert that the response is 'Invalid username or password'
-        self.assertEqual(response.content.decode(), 'Invalid username or password')
-        self.assertEqual(response.status_code, 200)
+        response_json = json.loads(response.content.decode())
+        self.assertEqual(response_json['status'], 'failed')
+        self.assertEqual(response.status_code, 401)
