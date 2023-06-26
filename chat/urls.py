@@ -8,7 +8,7 @@ urlpatterns = [
     path('api-key/', APIKeyView.as_view()),
     path('chatroom/', ChatRoomAPIView.as_view()),
     path('chat/', ChatAPIView.as_view()),
-    path('chat-history/<int:chatroom_id>/', ChatHistoryAPIView.as_view()),
+    path('chat-history/<int:chatroom_id>/', ChatHistoryAPIView.as_view(), name='chat-history'),
     path('prompt-topic/', PromptTopicAPIView.as_view()),
     path('prompts/', PromptAPIView.as_view()),
     path('login/', CustomLogInView.as_view(), name='login'),
