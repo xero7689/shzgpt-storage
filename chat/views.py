@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token as get_csrf_token
 
@@ -13,12 +16,6 @@ from .models import ChatUser, ChatRoom, Chat, PromptTopic, Prompt, APIKey
 from .serializer import ChatUserSerializer, ChatRoomSerializer, ChatSerializer, PromptTopicSerializer, PromptSerializer, APIKeySerializer
 from .permissions import IsSuperUser
 from .paginators import ChatHistoryPagination
-
-
-def print_session(request):
-    print('---')
-    for k, v in request.session.items():
-        print('{} => {}'.format(k, v))
 
 
 class CustomLogInView(APIView):
@@ -45,18 +42,25 @@ class CustomLogInView(APIView):
             login(request, user)
 
             chatUser = ChatUser.objects.get(user=user)
+
             serializer = ChatUserSerializer(chatUser)
             content = {
                 'data': serializer.data,
                 'status': 'success'
             }
             session_key = request.session.session_key
+
             csrf_token = get_csrf_token(request)
 
             response = JsonResponse(content, safe=False)
             response.set_cookie('sessionid', session_key)
             response.set_cookie('csrftoken', csrf_token)
             response.set_cookie('c_user', chatUser.id)
+
+            openai_api_key = APIKey.objects.filter(owner__user=user).first()
+            if openai_api_key:
+                response.set_cookie('c_api_key', openai_api_key)
+
             return response
         else:
             # Increment the login attempts counter
@@ -110,6 +114,9 @@ class ChatRoomAPIView(generics.ListCreateAPIView):
         user = self.request.user
         return ChatRoom.objects.filter(owner__user=user).order_by('created_at')
 
+    def perform_create(self, serializer):
+        serializer.save(owner=ChatUser.objects.get(user=self.request.user))
+
 
 class ChatAPIView(generics.ListCreateAPIView):
     authentication_classes = [authentication.SessionAuthentication]
@@ -120,25 +127,93 @@ class ChatAPIView(generics.ListCreateAPIView):
 
 
 class ChatHistoryAPIView(APIView):
+    """
+    View to retrieve the chat history for a particular chatroom, with optional datetime filters.
+
+    If the `date_gte` and `date_lt` parameters are not provided in the GET request, this view will return
+    the latest 20 chat messages for the given `chatroom_id`.
+
+    If the `date_gte` and/or `date_lt` parameters are provided, this view will return all chat messages that
+    were created between the given range of datetimes, for the given `chatroom_id`.
+
+    Accepted query parameters:
+    - date_gte (optional): Filter the chat messages to only include those created on or after this datetime.
+      Format: %Y-%m-%d %H:%M:%S (e.g. "2021-09-01 09:30:00").
+    - date_lt (optional): Filter the chat messages to only include those created before this datetime.
+      Format: %Y-%m-%d %H:%M:%S (e.g. "2021-10-01 18:15:00").
+
+    Returns a JSON response containing an array of `ChatSerializer`-serialized data.
+    """
+
     authentication_classes = [authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = ChatHistoryPagination
+
+    DEFAULT_CHAT_LIMIT = 20
 
     def __init__(self, *args, **kwargs):
         super(ChatHistoryAPIView, self).__init__(*args, **kwargs)
-        self.paginator = self.pagination_class()
 
     def get(self, request, chatroom_id, format=None):
+        """
+        Retrieves the chat history for the given chatroom ID, with optional datetime filters.
+
+        :param request: The `Request` object passed by the Django server.
+        :param chatroom_id: The ID of the chatroom to retrieve the chat history for.
+        :param format: The content type format of the response (e.g. "json", "html").
+        :returns: A `Response` object containing the serialized chat history data.
+        """
+
         user = request.user
-        chats = Chat.objects.filter(chatroom__owner__user=user).filter(
-            chatroom__id=chatroom_id).order_by('-created_at')
 
-        # page = self.paginate_queryset(chats)
-        page = self.paginator.paginate_queryset(chats, self.request)
+        chatroom = ChatRoom.objects.filter(
+            owner__user=user, id=chatroom_id).first()
+        if not chatroom:
+            return Response({
+                'status': 'failed',
+                'detail': 'Invalid Chatroom ID',
+            }, status=status.HTTP_400_BAD_REQUEST)
 
-        if page is not None:
-            serializer = ChatSerializer(page, many=True)
-            return self.paginator.get_paginated_response(serializer.data)
+        # Get the date_gte and date_lt parameters from the GET query
+        date_gte_str = request.GET.get('date_gte')
+        date_lt_str = request.GET.get('date_lt')
+
+        # Set default start and end dates if not provided
+        chats = Chat.objects.filter(chatroom=chatroom).order_by('created_at')
+        if not chats.exists():
+            return Response({
+                'status': 'failed',
+                'detail': 'No chat history for the specified chatroom',
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        start_date = chats.first().created_at
+        end_date = timezone.now()
+
+        # Parse datetime strings to objects and update start/end date accordingly
+        try:
+            if date_gte_str:
+                start_date = datetime.strptime(date_gte_str, '%Y-%m-%d %H:%M:%S')
+            if date_lt_str:
+                end_date = datetime.strptime(date_lt_str, '%Y-%m-%d %H:%M:%S')
+        except ValueError as ve:
+            return Response({
+                'status': 'failed',
+                'detail': str(ve)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # If both start and end dates are the same, add 1 second to end_date to include messages during that second
+        if start_date == end_date:
+            end_date += timezone.timedelta(seconds=1)
+
+        # Fetch chats based on start and end dates
+        chats = Chat.objects.filter(
+            chatroom=chatroom,
+            created_at__gte=start_date,
+            created_at__lt=end_date
+        ).order_by('-created_at')
+
+        # If date_gte or date_lt is not provided, limit number of results to DEFAULT_CHAT_LIMIT
+        if not date_gte_str and not date_lt_str:
+            chats = chats[:self.DEFAULT_CHAT_LIMIT]
 
         serializer = ChatSerializer(chats, many=True)
         return Response(serializer.data)
