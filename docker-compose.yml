@@ -1,0 +1,58 @@
+version: "3"
+services:
+  app:
+    container_name: "shz-gpt-storage-app"
+    image: shz_gpt_storage:${IMAGE_VERSION:-latest}
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        GIT_USER:
+        GIT_PASSWD:
+        DJANGO_SUPERUSER_USERNAME:
+        DJANGO_SUPERUSER_PASSWORD:
+        DJANGO_SUPERUSER_EMAIL:
+    command: [ "/bin/bash", "-c", "uwsgi --ini uwsgi.ini" ]
+    volumes:
+      - .:/workspace
+      - shz_gpt_app_data:${CONTAINER_STORAGE_PATH}
+    ports:
+      - "8004:8004"
+    environment:
+      IN_CONTAINER:
+      IS_DEBUG:
+      CONTAINER_STORAGE_PATH:
+      LOGGING_FILE_NAME:
+      DEPLOY_STAGE:
+      DJANGO_SECRET_KEY:
+      DATABASE_URI:
+      DATABASE_DB_NAME:
+      DATABASE_USER:
+      DATABASE_PASSWD:
+      DJANGO_SUPERUSER_USERNAME:
+      DJANGO_SUPERUSER_PASSWORD:
+      DJANGO_SUPERUSER_EMAIL:
+      DJANGO_ADMIN_URL_PATH:
+      AWS_S3_REGION:
+      AWS_STORAGE_BUCKET_NAME:
+      AWS_S3_CACHE_CONTROL_MAX_AGE:
+      GIT_USER:
+      GIT_PASSWORD:
+    depends_on:
+      - db
+  db:
+    container_name: "shz-gpt-storage-db"
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: "${DATABASE_DB_NAME:-for-development}"
+      POSTGRES_USER: "${DATABASE_USER:-devel}"
+      POSTGRES_PASSWORD: "${DATABASE_PSSWORD:-for-development}"
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
+  shz_gpt_app_data:
+    external: false
