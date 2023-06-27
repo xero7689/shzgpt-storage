@@ -38,6 +38,7 @@ services:
       AWS_S3_CACHE_CONTROL_MAX_AGE:
       GIT_USER:
       GIT_PASSWORD:
+      CORS_ALLOWED_ORIGIN:
     depends_on:
       - db
   db:
