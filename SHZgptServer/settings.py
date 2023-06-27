@@ -190,18 +190,11 @@ REST_FRAMEWORK = {
 
 
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:3000",
-    "http://localhost:3000",
-    "http://10.178.1.206:3000"
+    environment.CORS_ALLOWED_ORIGIN,
 ]
 
-# CORS_ALLOW_ALL_ORIGINS = True
-
-
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://10.178.1.206:3000"
+    environment.CORS_ALLOWED_ORIGIN,
 ]
 
 CORS_ALLOW_CREDENTIALS = True

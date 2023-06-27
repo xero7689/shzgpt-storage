@@ -7,6 +7,7 @@ IS_DEBUG = (os.environ.get('IS_DEBUG', 'True') == 'True')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 DJANGO_SECRET_KEY=os.environ.get('DJANGO_SECRET_KEY', 'you_should_generate_new_key')
+CORS_ALLOWED_ORIGIN=os.environ.get('CORS_ALLOWED_ORIGIN', 'http://127.0.0.1:3000')
 
 # Container Settings
 IN_CONTAINER = os.environ.get('IN_CONTAINER', False)
