@@ -10,7 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from . import from_env as environment
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,16 +23,25 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=51%kro2rizkk=%8fj!j#d3m5-l+(g9)0jo3mppodc=su2aj)e'
+# SECRET_KEY = 'django-insecure-=51%kro2rizkk=%8fj!j#d3m5-l+(g9)0jo3mppodc=su2aj)e'
+SECRET_KEY = environment.DJANGO_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEPLOY_STAGE = environment.DEPLOY_STAGE
+DEBUG = True if environment.IS_DEBUG else False
 
-ALLOWED_HOSTS = []
+IN_CONTAINER = environment.IN_CONTAINER
+IS_LOCAL = True if not IN_CONTAINER else False
+if IN_CONTAINER:
+    CONTAINER_STORAGE_PATH = environment.CONTAINER_STORAGE_PATH
+    LOGGING_FILE_NAME = environment.LOGGING_FILE_NAME
 
+USE_S3 = True if environment.AWS_S3_REGION else False
+
+ALLOWED_HOSTS = ["*"]
+DJANGO_ADMIN_URL_PATH = environment.DJANGO_ADMIN_URL_PATH
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
     'chat'
 ]
@@ -44,6 +57,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -75,12 +89,27 @@ WSGI_APPLICATION = 'SHZgptServer.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if IS_LOCAL:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': environment.DATABASE_DB_NAME,
+            'USER': environment.DATABASE_USER,
+            'PASSWORD': environment.DATABASE_PASSWD,
+            'HOST': environment.DATABASE_URI,
+            'PORT': environment.DATABASE_URI_PORT,
+            'OPTIONS': {
+                'application_name': environment.APP_NAME
+            }
+        }
+    }
 
 
 # Password validation
@@ -118,6 +147,28 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL = 'media/'
+if USE_S3:
+    AWS_S3_REGION = environment.AWS_S3_REGION
+    AWS_ACCESS_KEY_ID = environment.AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY = environment.AWS_SECRET_ACCESS_KEY
+    AWS_STORAGE_BUCKET_NAME = environment.AWS_STORAGE_BUCKET_NAME
+    AWS_S3_CUSTOM_DOMAIN = environment.AWS_S3_CUSTOM_DOMAIN
+    AWS_S3_OBJECT_PARAMETERS = environment.AWS_S3_OBJECT_PARAMETERS
+    AWS_LOCATION = environment.AWS_LOCATION
+
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+else:
+    if IN_CONTAINER:
+        STATIC_ROOT = os.path.join(CONTAINER_STORAGE_PATH, 'static')
+        MEDIA_ROOT = os.path.join(CONTAINER_STORAGE_PATH, 'media')
+    else:
+        STATIC_ROOT = os.path.join(BASE_DIR, 'static_root/')
+        MEDIA_ROOT = os.path.join(BASE_DIR, 'media_root')
+    STATICFILES_DIRS = [
+        BASE_DIR / "static_extra",
+    ]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -130,5 +181,21 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
 
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 25,
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        # 'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
 }
+
+
+# CORS Relevant Settings
+CORS_ALLOWED_ORIGINS = environment.CORS_ALLOWED_ORIGIN
+
+CSRF_TRUSTED_ORIGINS = environment.CORS_ALLOWED_ORIGIN
+
+CORS_ALLOW_CREDENTIALS = True
+
+COOKIES_ALLOWED_DOMAIN = environment.COOKIES_ALLOWED_DOMAIN
+SESSION_COOKIE_DOMAIN = environment.COOKIES_ALLOWED_DOMAIN
+CSRF_COOKIE_DOMAIN = environment.COOKIES_ALLOWED_DOMAIN
