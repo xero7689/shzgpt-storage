@@ -1,4 +1,5 @@
 import os
+import ast
 
 # General Settings
 APP_NAME = os.environ.get('APP_NAME', 'blog')
@@ -7,7 +8,14 @@ IS_DEBUG = (os.environ.get('IS_DEBUG', 'True') == 'True')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 DJANGO_SECRET_KEY=os.environ.get('DJANGO_SECRET_KEY', 'you_should_generate_new_key')
-CORS_ALLOWED_ORIGIN=os.environ.get('CORS_ALLOWED_ORIGIN', 'http://127.0.0.1:3000')
+CORS_ALLOWED_ORIGIN=os.environ.get('CORS_ALLOWED_ORIGIN', '["http://127.0.0.1:3000"]')
+try:
+    CORS_ALLOWED_ORIGIN = ast.literal_eval(CORS_ALLOWED_ORIGIN)
+    if not isinstance(CORS_ALLOWED_ORIGIN, list):
+        raise ValueError("CORS_ALLOWED_ORIGIN should be a valid Python list string representation")
+except ValueError:
+    raise ValueError("CORS_ALLOWED_ORIGIN should be a valid Python list string representation")
+
 COOKIES_ALLOWED_DOMAIN=os.environ.get('COOKIES_ALLOWED_DOMAIN', '.127.0.0.1')
 
 # Container Settings
