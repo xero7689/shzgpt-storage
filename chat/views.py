@@ -6,6 +6,8 @@ from django.middleware.csrf import get_token as get_csrf_token
 
 from django.http import HttpResponse, JsonResponse
 
+from django.conf import settings
+
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.response import Response
@@ -53,13 +55,11 @@ class CustomLogInView(APIView):
             csrf_token = get_csrf_token(request)
 
             response = JsonResponse(content, safe=False)
-            response.set_cookie('sessionid', session_key)
-            response.set_cookie('csrftoken', csrf_token)
-            response.set_cookie('c_user', chatUser.id)
+            response.set_cookie('c_user', chatUser.id, domain=settings.COOKIES_ALLOWED_DOMAIN)
 
             openai_api_key = APIKey.objects.filter(owner__user=user).first()
             if openai_api_key:
-                response.set_cookie('c_api_key', openai_api_key)
+                response.set_cookie('c_api_key', openai_api_key, domain=settings.COOKIES_ALLOWED_DOMAIN)
 
             return response
         else:
@@ -82,11 +82,9 @@ class CustomLogOutView(APIView):
                 'status': 'success',
                 'detail': 'Successfully logged out'
             })
-            logout(request)
-            response.delete_cookie('sessionid')
-            response.delete_cookie('csrftoken')
-            response.delete_cookie('c_user')
-            response.delete_cookie('c_api_key')
+            response.delete_cookie('csrftoken', domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.delete_cookie('c_user', domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.delete_cookie('c_api_key', domain=settings.COOKIES_ALLOWED_DOMAIN)
         else:
             response = Response({
                 'status': 'failed',
