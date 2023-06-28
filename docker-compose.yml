@@ -1,6 +1,6 @@
 version: "3"
 services:
-  app:
+  shz-gpt-app:
     container_name: "shz-gpt-storage-app"
     image: shz_gpt_storage:${IMAGE_VERSION:-latest}
     build:
@@ -41,20 +41,18 @@ services:
       CORS_ALLOWED_ORIGIN:
       COOKIES_ALLOWED_DOMAIN:
     depends_on:
-      - db
-  db:
+      - shz-gpt-db
+  shz-gpt-db:
     container_name: "shz-gpt-storage-db"
     image: postgres:latest
     environment:
       POSTGRES_DB: "${DATABASE_DB_NAME:-for-development}"
       POSTGRES_USER: "${DATABASE_USER:-devel}"
       POSTGRES_PASSWORD: "${DATABASE_PSSWORD:-for-development}"
-    ports:
-      - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - shz_gpt_db_data:/var/lib/postgresql/data
 
 volumes:
-  db_data:
+  shz_gpt_db_data:
   shz_gpt_app_data:
     external: false
