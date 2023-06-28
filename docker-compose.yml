@@ -39,6 +39,7 @@ services:
       GIT_USER:
       GIT_PASSWORD:
       CORS_ALLOWED_ORIGIN:
+      COOKIES_ALLOWED_DOMAIN:
     depends_on:
       - db
   db:

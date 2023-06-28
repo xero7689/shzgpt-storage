@@ -6,6 +6,8 @@ from django.middleware.csrf import get_token as get_csrf_token
 
 from django.http import HttpResponse, JsonResponse
 
+from django.conf import settings
+
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.response import Response
@@ -53,13 +55,11 @@ class CustomLogInView(APIView):
             csrf_token = get_csrf_token(request)
 
             response = JsonResponse(content, safe=False)
-            response.set_cookie('sessionid', session_key)
-            response.set_cookie('csrftoken', csrf_token)
-            response.set_cookie('c_user', chatUser.id)
+            response.set_cookie('c_user', chatUser.id, domain=settings.COOKIES_ALLOWED_DOMAIN)
 
             openai_api_key = APIKey.objects.filter(owner__user=user).first()
             if openai_api_key:
-                response.set_cookie('c_api_key', openai_api_key)
+                response.set_cookie('c_api_key', openai_api_key, domain=settings.COOKIES_ALLOWED_DOMAIN)
 
             return response
         else:
