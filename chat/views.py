@@ -82,11 +82,9 @@ class CustomLogOutView(APIView):
                 'status': 'success',
                 'detail': 'Successfully logged out'
             })
-            logout(request)
-            response.delete_cookie('sessionid')
-            response.delete_cookie('csrftoken')
-            response.delete_cookie('c_user')
-            response.delete_cookie('c_api_key')
+            response.delete_cookie('csrftoken', domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.delete_cookie('c_user', domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.delete_cookie('c_api_key', domain=settings.COOKIES_ALLOWED_DOMAIN)
         else:
             response = Response({
                 'status': 'failed',
