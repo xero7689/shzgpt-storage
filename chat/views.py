@@ -82,6 +82,7 @@ class CustomLogOutView(APIView):
                 'status': 'success',
                 'detail': 'Successfully logged out'
             })
+            response.delete_cookie('sessionid', domain=settings.COOKIES_ALLOWED_DOMAIN)
             response.delete_cookie('csrftoken', domain=settings.COOKIES_ALLOWED_DOMAIN)
             response.delete_cookie('c_user', domain=settings.COOKIES_ALLOWED_DOMAIN)
             response.delete_cookie('c_api_key', domain=settings.COOKIES_ALLOWED_DOMAIN)
