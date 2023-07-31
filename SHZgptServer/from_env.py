@@ -34,6 +34,11 @@ DATABASE_URI = os.environ.get('DATABASE_URI', 'localhost')
 DATABASE_READ_URI = os.environ.get('DATABASE_READ_URI', 'localhost')
 DATABASE_URI_PORT = os.environ.get('DATABASE_URI_PORT', 5432)
 
+# Cache Settings
+CACHE_URI = os.environ.get('CACHE_URI', 'localhost')
+CACHE_URI_PORT = int(os.environ.get('CACHE_URI_PORT', 6379))
+
+
 # S3 Settings
 AWS_S3_REGION = os.environ.get('AWS_S3_REGION')
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')

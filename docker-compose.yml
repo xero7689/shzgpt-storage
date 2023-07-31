@@ -29,6 +29,8 @@ services:
       DATABASE_DB_NAME:
       DATABASE_USER:
       DATABASE_PASSWD:
+      CACHE_URI:
+      CACHE_URI_PORT:
       DJANGO_SUPERUSER_USERNAME:
       DJANGO_SUPERUSER_PASSWORD:
       DJANGO_SUPERUSER_EMAIL:
@@ -42,6 +44,7 @@ services:
       COOKIES_ALLOWED_DOMAIN:
     depends_on:
       - shz-gpt-db
+      - shz-gpt-cache
   shz-gpt-db:
     container_name: "shz-gpt-storage-db"
     image: postgres:latest
@@ -51,6 +54,9 @@ services:
       POSTGRES_PASSWORD: "${DATABASE_PSSWORD:-for-development}"
     volumes:
       - shz_gpt_db_data:/var/lib/postgresql/data
+  shz-gpt-cache:
+    container_name: "shz-gpt-redis-cache"
+    image: redis:alpine
 
 volumes:
   shz_gpt_db_data:
