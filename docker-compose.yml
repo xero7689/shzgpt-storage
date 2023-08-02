@@ -17,7 +17,7 @@ services:
       - .:/workspace
       - shz_gpt_app_data:${CONTAINER_STORAGE_PATH}
     ports:
-      - "8004:8004"
+      - "8000:8004"
     environment:
       IN_CONTAINER:
       IS_DEBUG:

@@ -1,8 +1,8 @@
 from datetime import datetime
 
 from django.utils import timezone
-from django.contrib.auth import authenticate, login, logout
-from django.middleware.csrf import get_token as get_csrf_token
+from django.contrib.auth import authenticate, login
+from django.core.cache import cache
 
 from django.http import HttpResponse, JsonResponse
 
@@ -16,8 +16,6 @@ from rest_framework import status
 
 from .models import ChatUser, ChatRoom, Chat, PromptTopic, Prompt, APIKey
 from .serializer import ChatUserSerializer, ChatRoomSerializer, ChatSerializer, PromptTopicSerializer, PromptSerializer, APIKeySerializer
-from .permissions import IsSuperUser
-from .paginators import ChatHistoryPagination
 
 
 class CustomLogInView(APIView):
@@ -50,16 +48,15 @@ class CustomLogInView(APIView):
                 'data': serializer.data,
                 'status': 'success'
             }
-            session_key = request.session.session_key
-
-            csrf_token = get_csrf_token(request)
 
             response = JsonResponse(content, safe=False)
-            response.set_cookie('c_user', chatUser.id, domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.set_cookie('c_user', chatUser.id,
+                                domain=settings.COOKIES_ALLOWED_DOMAIN)
 
             openai_api_key = APIKey.objects.filter(owner__user=user).first()
             if openai_api_key:
-                response.set_cookie('c_api_key', openai_api_key, domain=settings.COOKIES_ALLOWED_DOMAIN)
+                response.set_cookie('c_api_key', openai_api_key,
+                                    domain=settings.COOKIES_ALLOWED_DOMAIN)
 
             return response
         else:
@@ -82,10 +79,14 @@ class CustomLogOutView(APIView):
                 'status': 'success',
                 'detail': 'Successfully logged out'
             })
-            response.delete_cookie('sessionid', domain=settings.COOKIES_ALLOWED_DOMAIN)
-            response.delete_cookie('csrftoken', domain=settings.COOKIES_ALLOWED_DOMAIN)
-            response.delete_cookie('c_user', domain=settings.COOKIES_ALLOWED_DOMAIN)
-            response.delete_cookie('c_api_key', domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.delete_cookie(
+                'sessionid', domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.delete_cookie(
+                'csrftoken', domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.delete_cookie(
+                'c_user', domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.delete_cookie(
+                'c_api_key', domain=settings.COOKIES_ALLOWED_DOMAIN)
         else:
             response = Response({
                 'status': 'failed',
@@ -111,10 +112,26 @@ class ChatRoomAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return ChatRoom.objects.filter(owner__user=user).order_by('created_at')
+        queryset_cache_key = f'views.queryset.cache.chatroomapi.{user}'
+        cached_queryset = cache.get(queryset_cache_key)
+
+        if cached_queryset is not None:
+            queryset = cached_queryset
+        else:
+            queryset = ChatRoom.objects.filter(
+                owner__user=user).order_by('created_at')
+            cache.set(queryset_cache_key, queryset, 60 * 60)
+
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(owner=ChatUser.objects.get(user=self.request.user))
+
+        user = self.request.user
+        queryset_cache_key = f'views.queryset.cache.chatroomapi.{user}'
+        queryset = ChatRoom.objects.filter(
+            owner__user=user).order_by('created_at')
+        cache.set(queryset_cache_key, queryset, 60 * 60)
 
 
 class ChatAPIView(generics.ListCreateAPIView):
@@ -152,6 +169,7 @@ class ChatHistoryAPIView(APIView):
     def __init__(self, *args, **kwargs):
         super(ChatHistoryAPIView, self).__init__(*args, **kwargs)
 
+    # @method_decorator(cache_page(60*60*2))
     def get(self, request, chatroom_id, format=None):
         """
         Retrieves the chat history for the given chatroom ID, with optional datetime filters.
@@ -190,7 +208,8 @@ class ChatHistoryAPIView(APIView):
         # Parse datetime strings to objects and update start/end date accordingly
         try:
             if date_gte_str:
-                start_date = datetime.strptime(date_gte_str, '%Y-%m-%d %H:%M:%S')
+                start_date = datetime.strptime(
+                    date_gte_str, '%Y-%m-%d %H:%M:%S')
             if date_lt_str:
                 end_date = datetime.strptime(date_lt_str, '%Y-%m-%d %H:%M:%S')
         except ValueError as ve:
