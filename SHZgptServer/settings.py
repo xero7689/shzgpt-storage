@@ -111,6 +111,22 @@ else:
         }
     }
 
+# Cache
+if IS_LOCAL:
+    CACHES = {
+        'default': {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake",
+        },
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': f'redis://{environment.CACHE_URI}:{environment.CACHE_URI_PORT}'
+        },
+    }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

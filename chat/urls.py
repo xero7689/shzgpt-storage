@@ -6,7 +6,7 @@ from .views import CustomLogInView, CustomLogOutView, ChatUserAPIView, ChatRoomA
 urlpatterns = [
     path('user/', ChatUserAPIView.as_view()),
     path('api-key/', APIKeyView.as_view()),
-    path('chatroom/', ChatRoomAPIView.as_view()),
+    path('chatroom/', ChatRoomAPIView.as_view(), name='chatrooms'),
     path('chat/', ChatAPIView.as_view()),
     path('chat-history/<int:chatroom_id>/', ChatHistoryAPIView.as_view(), name='chat-history'),
     path('prompt-topic/', PromptTopicAPIView.as_view()),
