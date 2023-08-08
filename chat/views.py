@@ -38,7 +38,7 @@ class CustomLogInView(APIView):
 
             serializer = ChatUserSerializer(chatUser)
             content = build_response_content(
-                data=serializer.data, status="success", detail="")
+                data=serializer.data, status="succeeded", detail="")
 
             response = JsonResponse(content, safe=False)
             response.set_cookie('c_user', chatUser.id,
@@ -63,7 +63,7 @@ class CustomLogOutView(APIView):
     def post(self, request, format=None):
         if self.request.user.is_authenticated:
             response = Response({
-                'status': 'success',
+                'status': 'succeeded',
                 'detail': 'Successfully logged out'
             })
             response.delete_cookie(
