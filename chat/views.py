@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.contrib.auth import authenticate, login
 from django.core.cache import cache
 
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 
 from django.conf import settings
 
@@ -13,41 +13,32 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import authentication, permissions
 from rest_framework import status
+from rest_framework.serializers import ReturnDict
 
 from .models import ChatUser, ChatRoom, Chat, PromptTopic, Prompt, APIKey
 from .serializer import ChatUserSerializer, ChatRoomSerializer, ChatSerializer, PromptTopicSerializer, PromptSerializer, APIKeySerializer
+from .utils import build_response_content
 
 
 class CustomLogInView(APIView):
-    def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
+    def post(self, request, *args, **kwargs) -> JsonResponse:
+        username: str = request.data.get('username')
+        password: str = request.data.get('password')
 
-        # Check if this user has exceeded the maximum login attempts
-        # user_attempts = cache.get(username, 0)
-        # if user_attempts >= 5:
-        # return HttpResponse('Account locked due to too many login attempts')
-
-        if not username:
-            return HttpResponse('Username is required')
-
-        if not password:
-            return HttpResponse('Password is required')
+        if not username or not password:
+            content = build_response_content(data=ReturnDict(
+                serializer=ChatUserSerializer), status="failed", detail="Username/Password is required")
+            return JsonResponse(content, status=status.HTTP_401_UNAUTHORIZED, safe=False)
 
         user = authenticate(request, username=username, password=password)
-
         if user is not None:
-            # Reset the login attempts counter
-            # cache.delete(username)
             login(request, user)
 
             chatUser = ChatUser.objects.get(user=user)
 
             serializer = ChatUserSerializer(chatUser)
-            content = {
-                'data': serializer.data,
-                'status': 'success'
-            }
+            content = build_response_content(
+                data=serializer.data, status="succeeded", detail="")
 
             response = JsonResponse(content, safe=False)
             response.set_cookie('c_user', chatUser.id,
@@ -55,17 +46,13 @@ class CustomLogInView(APIView):
 
             openai_api_key = APIKey.objects.filter(owner__user=user).first()
             if openai_api_key:
-                response.set_cookie('c_api_key', openai_api_key,
+                response.set_cookie('c_api_key', str(openai_api_key),
                                     domain=settings.COOKIES_ALLOWED_DOMAIN)
 
             return response
         else:
-            # Increment the login attempts counter
-            # cache.set(username, user_attempts + 1, timeout=600) # Lock the account for 10 minutes
-            content = {
-                'status': 'failed',
-                'detail': 'Invalid username or password'
-            }
+            content = build_response_content(data=ReturnDict(
+                serializer=ChatUserSerializer), status="failed", detail="Username/Password Invalid")
             return JsonResponse(content, status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -76,7 +63,7 @@ class CustomLogOutView(APIView):
     def post(self, request, format=None):
         if self.request.user.is_authenticated:
             response = Response({
-                'status': 'success',
+                'status': 'succeeded',
                 'detail': 'Successfully logged out'
             })
             response.delete_cookie(
