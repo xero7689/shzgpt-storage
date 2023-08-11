@@ -43,6 +43,7 @@ DJANGO_ADMIN_URL_PATH = environment.DJANGO_ADMIN_URL_PATH
 
 # Application definition
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -84,6 +85,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'SHZgptServer.wsgi.application'
+ASGI_APPLICATION = 'SHZgptServer.asgi.application'
 
 
 # Database
