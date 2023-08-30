@@ -23,7 +23,7 @@ class CustomLoginViewTestCase(TestCase):
 
         # Assert that the user is authenticated and the response is 'Logged in'
         response_json = json.loads(response.content.decode())
-        self.assertEqual(response_json['status'], 'success')
+        self.assertEqual(response_json['status'], 'succeeded')
         self.assertEqual(response.status_code, 200)
 
     def test_invalid_username(self):
@@ -32,8 +32,8 @@ class CustomLoginViewTestCase(TestCase):
         response = client.post(reverse('login'), {'username': '', 'password': self.password})
 
         # Assert that the response is 'Username is required'
-        self.assertEqual(response.content.decode(), 'Username is required')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content.decode(), '{"status": "failed", "detail": "Username/Password is required", "data": {}}')
+        self.assertEqual(response.status_code, 401)
 
     def test_invalid_password(self):
         # Create a test client and make a POST request to the login view with invalid password
@@ -42,8 +42,8 @@ class CustomLoginViewTestCase(TestCase):
 
         # Assert that the response is 'Password is required'
         print(response.content.decode())
-        self.assertEqual(response.content.decode(), 'Password is required')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content.decode(), '{"status": "failed", "detail": "Username/Password is required", "data": {}}')
+        self.assertEqual(response.status_code, 401)
 
     def test_invalid_credentials(self):
         # Create a test client and make a POST request to the login view with invalid credentials

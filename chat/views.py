@@ -255,3 +255,23 @@ class APIKeyView(generics.ListCreateAPIView):
         owner = ChatUser.objects.get(user=self.request.user)
         api_key = serializer.save(owner=owner)
         return Response(self.serializer_class(api_key).data, status=status.HTTP_201_CREATED)
+
+
+class ChatSocketInitView(APIView):
+    authentication_classes = [authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        latest_used_chatroom = ChatRoom.objects.latest('last_used_time')
+        chatroom_id = latest_used_chatroom.id
+        chat = Chat.objects.filter(
+            chatroom=latest_used_chatroom).order_by("created_at")[0]
+
+        # Should I use Chat Response here?
+        chat_socket_init_state = {
+            "chatroomId": chatroom_id,
+            "content": chat.content,
+            "role": chat.role,
+            "timestamp": chat.created_at.timestamp()
+        }
+        return JsonResponse(chat_socket_init_state)
