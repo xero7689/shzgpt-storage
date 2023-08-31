@@ -12,12 +12,12 @@ services:
         DJANGO_SUPERUSER_USERNAME:
         DJANGO_SUPERUSER_PASSWORD:
         DJANGO_SUPERUSER_EMAIL:
-    command: [ "/bin/bash", "-c", "uwsgi --ini uwsgi.ini" ]
+    command: [ "python", "main.py" ]
     volumes:
       - .:/workspace
       - shz_gpt_app_data:${CONTAINER_STORAGE_PATH}
     ports:
-      - "8000:8004"
+      - "8000:8000"
     environment:
       IN_CONTAINER:
       IS_DEBUG:

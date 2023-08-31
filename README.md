@@ -60,6 +60,6 @@ And start the server:
 docker-compose up
 ```
 
-The server will also start a postgres database and  should be accessible on 0.0.0.0:8004 defaultly.
+The server will also start a postgres database and  should be accessible on 0.0.0.0:8000 defaultly.
 
 You can modify these configuration as you want!
