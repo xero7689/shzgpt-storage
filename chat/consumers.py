@@ -23,7 +23,7 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
-        print("Socket Disconnect")
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, bytes_data):
         await login(self.scope, self.scope['user'])
@@ -79,6 +79,20 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
             return response.SerializeToString()
         return response
 
+    def build_gpt_message_response_rr(self, request, content, serialize=True):
+        response = ChatResponse()
+
+        response.status_code = StatusCode.FAILED
+        response.context.chatroom_id = request.context.chatroom_id
+        response.context.content = content
+        response.context.role = ChatRoleType.ASSISTANT
+        response.status_detail = content
+        response.context.timestamp.GetCurrentTime()
+
+        if serialize is True:
+            return response.SerializeToString()
+        return response
+
     async def return_gpt_message(self, event):
         message = event["message"]
         request = Parse(message, ChatRequest())
@@ -94,12 +108,18 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
 
         # Format Recent Chat Messages
         gpt_request_messages = formate_chats_to_gpt_request_messages(recent_chat_messages[::-1])
-        gpt_content = chatbot.send(gpt_request_messages)
 
-        # Save GPT Content to Database
-        await self.save_gpt_response_message(request, gpt_content)
+        try:
+            gpt_content = chatbot.send(gpt_request_messages)
 
-        # Send Response
-        # await self.send(text_data=json.dumps({"message": message}))
-        response = self.build_gpt_message_response(request, gpt_content)
+            # Save GPT Content to Database
+            await self.save_gpt_response_message(request, gpt_content)
+
+            # Send Response
+            # await self.send(text_data=json.dumps({"message": message}))
+            response = self.build_gpt_message_response(request, gpt_content)
+        except Exception as error:
+            # Handling OpenAIs 500 Internal Server Error
+            response = self.build_gpt_message_response(request, str(error))
+
         await self.send(bytes_data=response)
