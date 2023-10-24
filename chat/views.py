@@ -255,3 +255,17 @@ class APIKeyView(generics.ListCreateAPIView):
         owner = ChatUser.objects.get(user=self.request.user)
         api_key = serializer.save(owner=owner)
         return Response(self.serializer_class(api_key).data, status=status.HTTP_201_CREATED)
+
+
+class ChatSocketInitView(APIView):
+    authentication_classes = [authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        chat_socket_init_state = {
+            "chatroomId": None,
+            "content": None,
+            "role": None,
+            "timestamp": None
+        }
+        return JsonResponse(chat_socket_init_state)

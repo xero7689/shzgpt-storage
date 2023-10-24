@@ -43,6 +43,7 @@ DJANGO_ADMIN_URL_PATH = environment.DJANGO_ADMIN_URL_PATH
 
 # Application definition
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -84,6 +85,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'SHZgptServer.wsgi.application'
+ASGI_APPLICATION = 'SHZgptServer.asgi.application'
 
 
 # Database
@@ -215,3 +217,20 @@ CORS_ALLOW_CREDENTIALS = True
 COOKIES_ALLOWED_DOMAIN = environment.COOKIES_ALLOWED_DOMAIN
 SESSION_COOKIE_DOMAIN = environment.COOKIES_ALLOWED_DOMAIN
 CSRF_COOKIE_DOMAIN = environment.COOKIES_ALLOWED_DOMAIN
+
+# Channels Settings
+if IS_LOCAL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        },
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [(environment.CACHE_URI, environment.CACHE_URI_PORT)],
+            },
+        },
+    }

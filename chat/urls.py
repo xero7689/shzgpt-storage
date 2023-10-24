@@ -1,5 +1,5 @@
 from django.urls import include, path
-from .views import CustomLogInView, CustomLogOutView, ChatUserAPIView, ChatRoomAPIView, ChatAPIView, ChatHistoryAPIView, PromptTopicAPIView, PromptAPIView, APIKeyView
+from .views import CustomLogInView, CustomLogOutView, ChatUserAPIView, ChatRoomAPIView, ChatAPIView, ChatHistoryAPIView, PromptTopicAPIView, PromptAPIView, APIKeyView, ChatSocketInitView
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
@@ -9,6 +9,7 @@ urlpatterns = [
     path('chatroom/', ChatRoomAPIView.as_view(), name='chatrooms'),
     path('chat/', ChatAPIView.as_view()),
     path('chat-history/<int:chatroom_id>/', ChatHistoryAPIView.as_view(), name='chat-history'),
+    path('chat-socket-init/', ChatSocketInitView.as_view()),
     path('prompt-topic/', PromptTopicAPIView.as_view()),
     path('prompts/', PromptAPIView.as_view()),
     path('login/', CustomLogInView.as_view(), name='login'),
