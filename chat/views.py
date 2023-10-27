@@ -121,12 +121,18 @@ class ChatRoomAPIView(generics.ListCreateAPIView):
         cache.set(queryset_cache_key, queryset, 60 * 60)
 
 
-class ChatAPIView(generics.ListCreateAPIView):
+class ChatsAPIView(generics.ListCreateAPIView):
     authentication_classes = [authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
-
     queryset = Chat.objects.all().order_by('-created_at')
     serializer_class = ChatSerializer
+
+
+class ChatAPIView(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ChatSerializer
+    queryset = Chat.objects.all()
 
 
 class ChatHistoryAPIView(APIView):
