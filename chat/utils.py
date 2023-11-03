@@ -7,3 +7,7 @@ def build_response_content(data: ReturnDict, status: str, detail: str):
         'detail': detail,
         'data': data
     }
+
+
+def mask_api_key(api_key: str) -> str:
+    return api_key[:7] + '*' * 24 + api_key[-4:]

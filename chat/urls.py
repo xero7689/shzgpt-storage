@@ -5,7 +5,7 @@ from .views import CustomLogInView, CustomLogOutView, ChatUserAPIView, ChatRoomA
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     path('user/', ChatUserAPIView.as_view()),
-    path('api-key/', APIKeyView.as_view()),
+    path('api-key/', APIKeyView.as_view(), name='api-key'),
     path('chatroom/', ChatRoomAPIView.as_view(), name='chatrooms'),
     path('chats/', ChatsAPIView.as_view(), name='chat-list'),
     path('chat/<int:pk>/', ChatAPIView.as_view(), name='chat-detail'),

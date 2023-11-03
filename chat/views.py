@@ -17,7 +17,7 @@ from rest_framework.serializers import ReturnDict
 
 from .models import ChatUser, ChatRoom, Chat, PromptTopic, Prompt, APIKey
 from .serializer import ChatUserSerializer, ChatRoomSerializer, ChatSerializer, PromptTopicSerializer, PromptSerializer, APIKeySerializer
-from .utils import build_response_content
+from .utils import build_response_content, mask_api_key
 
 
 class CustomLogInView(APIView):
@@ -44,9 +44,10 @@ class CustomLogInView(APIView):
             response.set_cookie('c_user', chatUser.id,
                                 domain=settings.COOKIES_ALLOWED_DOMAIN)
 
-            openai_api_key = APIKey.objects.filter(owner__user=user).first()
-            if openai_api_key:
-                response.set_cookie('c_api_key', str(openai_api_key),
+            api_key = APIKey.objects.filter(owner__user=user).first()
+            if api_key:
+                masked_key = mask_api_key(api_key.key)
+                response.set_cookie('c_api_key', str(masked_key),
                                     domain=settings.COOKIES_ALLOWED_DOMAIN)
 
             return response
@@ -246,14 +247,26 @@ class PromptAPIView(generics.ListCreateAPIView):
     serializer_class = PromptSerializer
 
 
-class APIKeyView(generics.ListCreateAPIView):
+class APIKeyView(APIView):
     authentication_classes = [authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = APIKeySerializer
 
-    def get_queryset(self):
+    def get(self, request, *args, **kwargs):
         user = self.request.user
-        return APIKey.objects.filter(owner__user=user).order_by('created_at')
+        api_keys = APIKey.objects.filter(
+            owner__user=user).order_by('created_at')
+        masked_api_keys = []
+
+        for api_key in api_keys:
+            masked_key = mask_api_key(api_key.key)
+            masked_api_keys.append(masked_key)
+
+        # Modify the response as per your requirement
+        response_data = {
+            'masked_api_keys': masked_api_keys,
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
