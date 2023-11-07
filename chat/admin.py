@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Count
 
 from .models import ChatUser, ChatRoom, Chat, PromptTopic, Prompt, APIKey, AIVendor, AIModel
 
@@ -48,9 +49,23 @@ class ChatRoomAdmin(admin.ModelAdmin):
         'id',
         'owner',
         'name',
+        'chat_count',
         'created_at',
         'last_used_time',
     ]
+
+    # Override default queryset
+    # Annotate Chat Count to it
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        queryset = queryset.annotate(chat_count=Count('chat'))
+        return queryset
+
+    def chat_count(self, obj):
+        return obj.chat_count
+
+    chat_count.admin_order_field = 'chat_count'
+    chat_count.short_description = 'Chats'
 
 
 @admin.register(Chat)

@@ -1,10 +1,10 @@
 from datetime import datetime
 
 from django.utils import timezone
-from django.contrib.auth import authenticate, login, logout
-from django.middleware.csrf import get_token as get_csrf_token
+from django.contrib.auth import authenticate, login
+from django.core.cache import cache
 
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 
 from django.conf import settings
 
@@ -13,62 +13,47 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import authentication, permissions
 from rest_framework import status
+from rest_framework.serializers import ReturnDict
 
 from .models import ChatUser, ChatRoom, Chat, PromptTopic, Prompt, APIKey
 from .serializer import ChatUserSerializer, ChatRoomSerializer, ChatSerializer, PromptTopicSerializer, PromptSerializer, APIKeySerializer
-from .permissions import IsSuperUser
-from .paginators import ChatHistoryPagination
+from .utils import build_response_content, mask_api_key
 
 
 class CustomLogInView(APIView):
-    def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
+    def post(self, request, *args, **kwargs) -> JsonResponse:
+        username: str = request.data.get('username')
+        password: str = request.data.get('password')
 
-        # Check if this user has exceeded the maximum login attempts
-        # user_attempts = cache.get(username, 0)
-        # if user_attempts >= 5:
-        # return HttpResponse('Account locked due to too many login attempts')
-
-        if not username:
-            return HttpResponse('Username is required')
-
-        if not password:
-            return HttpResponse('Password is required')
+        if not username or not password:
+            content = build_response_content(data=ReturnDict(
+                serializer=ChatUserSerializer), status="failed", detail="Username/Password is required")
+            return JsonResponse(content, status=status.HTTP_401_UNAUTHORIZED, safe=False)
 
         user = authenticate(request, username=username, password=password)
-
         if user is not None:
-            # Reset the login attempts counter
-            # cache.delete(username)
             login(request, user)
 
             chatUser = ChatUser.objects.get(user=user)
 
             serializer = ChatUserSerializer(chatUser)
-            content = {
-                'data': serializer.data,
-                'status': 'success'
-            }
-            session_key = request.session.session_key
-
-            csrf_token = get_csrf_token(request)
+            content = build_response_content(
+                data=serializer.data, status="succeeded", detail="")
 
             response = JsonResponse(content, safe=False)
-            response.set_cookie('c_user', chatUser.id, domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.set_cookie('c_user', chatUser.id,
+                                domain=settings.COOKIES_ALLOWED_DOMAIN)
 
-            openai_api_key = APIKey.objects.filter(owner__user=user).first()
-            if openai_api_key:
-                response.set_cookie('c_api_key', openai_api_key, domain=settings.COOKIES_ALLOWED_DOMAIN)
+            api_key = APIKey.objects.filter(owner__user=user).first()
+            if api_key:
+                masked_key = mask_api_key(api_key.key)
+                response.set_cookie('c_api_key', str(masked_key),
+                                    domain=settings.COOKIES_ALLOWED_DOMAIN)
 
             return response
         else:
-            # Increment the login attempts counter
-            # cache.set(username, user_attempts + 1, timeout=600) # Lock the account for 10 minutes
-            content = {
-                'status': 'failed',
-                'detail': 'Invalid username or password'
-            }
+            content = build_response_content(data=ReturnDict(
+                serializer=ChatUserSerializer), status="failed", detail="Username/Password Invalid")
             return JsonResponse(content, status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -79,13 +64,17 @@ class CustomLogOutView(APIView):
     def post(self, request, format=None):
         if self.request.user.is_authenticated:
             response = Response({
-                'status': 'success',
+                'status': 'succeeded',
                 'detail': 'Successfully logged out'
             })
-            response.delete_cookie('sessionid', domain=settings.COOKIES_ALLOWED_DOMAIN)
-            response.delete_cookie('csrftoken', domain=settings.COOKIES_ALLOWED_DOMAIN)
-            response.delete_cookie('c_user', domain=settings.COOKIES_ALLOWED_DOMAIN)
-            response.delete_cookie('c_api_key', domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.delete_cookie(
+                'sessionid', domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.delete_cookie(
+                'csrftoken', domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.delete_cookie(
+                'c_user', domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.delete_cookie(
+                'c_api_key', domain=settings.COOKIES_ALLOWED_DOMAIN)
         else:
             response = Response({
                 'status': 'failed',
@@ -111,18 +100,40 @@ class ChatRoomAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return ChatRoom.objects.filter(owner__user=user).order_by('created_at')
+        queryset_cache_key = f'views.queryset.cache.chatroomapi.{user}'
+        cached_queryset = cache.get(queryset_cache_key)
+
+        if cached_queryset is not None:
+            queryset = cached_queryset
+        else:
+            queryset = ChatRoom.objects.filter(
+                owner__user=user).order_by('created_at')
+            cache.set(queryset_cache_key, queryset, 60 * 60)
+
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(owner=ChatUser.objects.get(user=self.request.user))
 
+        user = self.request.user
+        queryset_cache_key = f'views.queryset.cache.chatroomapi.{user}'
+        queryset = ChatRoom.objects.filter(
+            owner__user=user).order_by('created_at')
+        cache.set(queryset_cache_key, queryset, 60 * 60)
 
-class ChatAPIView(generics.ListCreateAPIView):
+
+class ChatsAPIView(generics.ListCreateAPIView):
     authentication_classes = [authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
-
     queryset = Chat.objects.all().order_by('-created_at')
     serializer_class = ChatSerializer
+
+
+class ChatAPIView(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ChatSerializer
+    queryset = Chat.objects.all()
 
 
 class ChatHistoryAPIView(APIView):
@@ -152,6 +163,7 @@ class ChatHistoryAPIView(APIView):
     def __init__(self, *args, **kwargs):
         super(ChatHistoryAPIView, self).__init__(*args, **kwargs)
 
+    # @method_decorator(cache_page(60*60*2))
     def get(self, request, chatroom_id, format=None):
         """
         Retrieves the chat history for the given chatroom ID, with optional datetime filters.
@@ -190,7 +202,8 @@ class ChatHistoryAPIView(APIView):
         # Parse datetime strings to objects and update start/end date accordingly
         try:
             if date_gte_str:
-                start_date = datetime.strptime(date_gte_str, '%Y-%m-%d %H:%M:%S')
+                start_date = datetime.strptime(
+                    date_gte_str, '%Y-%m-%d %H:%M:%S')
             if date_lt_str:
                 end_date = datetime.strptime(date_lt_str, '%Y-%m-%d %H:%M:%S')
         except ValueError as ve:
@@ -234,14 +247,26 @@ class PromptAPIView(generics.ListCreateAPIView):
     serializer_class = PromptSerializer
 
 
-class APIKeyView(generics.ListCreateAPIView):
+class APIKeyView(APIView):
     authentication_classes = [authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = APIKeySerializer
 
-    def get_queryset(self):
+    def get(self, request, *args, **kwargs):
         user = self.request.user
-        return APIKey.objects.filter(owner__user=user).order_by('created_at')
+        api_keys = APIKey.objects.filter(
+            owner__user=user).order_by('created_at')
+        masked_api_keys = []
+
+        for api_key in api_keys:
+            masked_key = mask_api_key(api_key.key)
+            masked_api_keys.append(masked_key)
+
+        # Modify the response as per your requirement
+        response_data = {
+            'masked_api_keys': masked_api_keys,
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -249,3 +274,17 @@ class APIKeyView(generics.ListCreateAPIView):
         owner = ChatUser.objects.get(user=self.request.user)
         api_key = serializer.save(owner=owner)
         return Response(self.serializer_class(api_key).data, status=status.HTTP_201_CREATED)
+
+
+class ChatSocketInitView(APIView):
+    authentication_classes = [authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        chat_socket_init_state = {
+            "chatroomId": None,
+            "content": None,
+            "role": None,
+            "timestamp": None
+        }
+        return JsonResponse(chat_socket_init_state)

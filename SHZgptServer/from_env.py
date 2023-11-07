@@ -7,16 +7,20 @@ DEPLOY_STAGE = os.environ.get('DEPLOY_STAGE', 'local')
 IS_DEBUG = (os.environ.get('IS_DEBUG', 'True') == 'True')
 
 # SECURITY WARNING: keep the secret key used in production secret!
-DJANGO_SECRET_KEY=os.environ.get('DJANGO_SECRET_KEY', 'you_should_generate_new_key')
-CORS_ALLOWED_ORIGIN=os.environ.get('CORS_ALLOWED_ORIGIN', '["http://127.0.0.1:3000"]')
+DJANGO_SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY', 'you_should_generate_new_key')
+CORS_ALLOWED_ORIGIN = os.environ.get(
+    'CORS_ALLOWED_ORIGIN', '["http://127.0.0.1:3000", "http://0.0.0.0:3000"]')
 try:
     CORS_ALLOWED_ORIGIN = ast.literal_eval(CORS_ALLOWED_ORIGIN)
     if not isinstance(CORS_ALLOWED_ORIGIN, list):
-        raise ValueError("CORS_ALLOWED_ORIGIN should be a valid Python list string representation")
+        raise ValueError(
+            "CORS_ALLOWED_ORIGIN should be a valid Python list string representation")
 except ValueError:
-    raise ValueError("CORS_ALLOWED_ORIGIN should be a valid Python list string representation")
+    raise ValueError(
+        "CORS_ALLOWED_ORIGIN should be a valid Python list string representation")
 
-COOKIES_ALLOWED_DOMAIN=os.environ.get('COOKIES_ALLOWED_DOMAIN', '.127.0.0.1')
+COOKIES_ALLOWED_DOMAIN = os.environ.get('COOKIES_ALLOWED_DOMAIN', '0.0.0.0')
 
 # Container Settings
 IN_CONTAINER = os.environ.get('IN_CONTAINER', False)
@@ -33,6 +37,11 @@ DATABASE_PASSWD = os.environ.get('DATABASE_PASSWD', 'for-development')
 DATABASE_URI = os.environ.get('DATABASE_URI', 'localhost')
 DATABASE_READ_URI = os.environ.get('DATABASE_READ_URI', 'localhost')
 DATABASE_URI_PORT = os.environ.get('DATABASE_URI_PORT', 5432)
+
+# Cache Settings
+CACHE_URI = os.environ.get('CACHE_URI', 'localhost')
+CACHE_URI_PORT = int(os.environ.get('CACHE_URI_PORT', 6379))
+
 
 # S3 Settings
 AWS_S3_REGION = os.environ.get('AWS_S3_REGION')

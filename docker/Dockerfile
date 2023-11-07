@@ -32,4 +32,4 @@ WORKDIR /workspace
 
 COPY . .
 ENTRYPOINT /bin/bash docker/bin/startup.sh $DJANGO_SUPERUSER_USERNAME $DJANGO_SUPERUSER_PASSWORD $DJANGO_SUPERUSER_EMAIL
-CMD python manage.py runserver 0.0.0.0:8000
+#CMD python manage.py runserver 0.0.0.0:8000
