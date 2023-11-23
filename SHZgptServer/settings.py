@@ -187,13 +187,51 @@ else:
         BASE_DIR / "static_extra",
     ]
 
+# Logging Settings
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': [],
+            'class': 'logging.StreamHandler',
+            'formatter': 'custom_formatter',
+        },
+        'stream': {
+            'level': 'ERROR',
+            'filters': [],
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'formatters': {
+        'custom_formatter': {
+            'format': '[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',  # Customize the date format
+        },
+    },
+    'loggers': {
+        'chat.consumers': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False
+        },
+        'chat.tests': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False
+        },
+
+    }
+}
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#
+# Rest Framework Settings
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
