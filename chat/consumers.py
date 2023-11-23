@@ -53,9 +53,22 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_recent_chat_messages(self, request, cal_num=10):
         chatroom_id = request.context.chatroom_id
+
         recent_messages = Chat.objects.filter(
             chatroom=chatroom_id).order_by('-created_at')[:cal_num]
-        return list(recent_messages)
+        recent_messages = list(recent_messages)
+
+        # Check token's length
+        cur_recents_tokens = sum(
+            [message.tokens for message in recent_messages])
+
+        while cur_recents_tokens >= 4096:
+            removed_msg = recent_messages.pop()
+            cur_recents_tokens -= removed_msg.tokens
+            logger.debug(
+                f'[get_recent_msg][too_many_tokens][remove] {removed_msg.id}')
+
+        return recent_messages
 
     @database_sync_to_async
     def save_request_chat_message(self, request):

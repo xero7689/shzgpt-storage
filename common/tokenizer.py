@@ -1,7 +1,7 @@
 import tiktoken
 
 
-def num_tokens_from_string(s, model="gpt-3.5-turbo-0613"):
+def num_tokens_from_message(message, model="gpt-3.5-turbo-0613"):
     """Return the number of tokens used by a list of messages."""
     try:
         encoding = tiktoken.encoding_for_model(model)
@@ -36,7 +36,10 @@ def num_tokens_from_string(s, model="gpt-3.5-turbo-0613"):
     num_tokens = 0
 
     num_tokens += tokens_per_message
-    num_tokens += len(encoding.encode(s))
+    for key, value in message.items():
+        num_tokens += len(encoding.encode(value))
+        if key == "name":
+            num_tokens += tokens_per_name
 
     num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
     return num_tokens
