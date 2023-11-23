@@ -1,5 +1,3 @@
-import logging
-
 from datetime import datetime
 
 from django.utils import timezone
@@ -20,9 +18,6 @@ from rest_framework.serializers import ReturnDict
 from .models import ChatUser, ChatRoom, Chat, PromptTopic, Prompt, APIKey
 from .serializer import ChatUserSerializer, ChatRoomSerializer, ChatSerializer, PromptTopicSerializer, PromptSerializer, APIKeySerializer
 from .utils import build_response_content, mask_api_key
-
-
-logger = logging.getLogger(__name__)
 
 
 class CustomLogInView(APIView):
