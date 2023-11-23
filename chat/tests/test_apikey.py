@@ -1,5 +1,3 @@
-import logging
-
 from django.test import TestCase
 from django.urls import reverse
 
@@ -11,7 +9,6 @@ from chat.utils import mask_api_key
 
 class APIKeyViewTest(TestCase):
     def setUp(self):
-        self.logger = logging.getLogger(__name__)
         self.client = APIClient()
 
         self.username = 'testuser'
