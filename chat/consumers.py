@@ -40,10 +40,7 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
         # Receive data from socket and send to the channels layer
         # This will transform chat.message to chat_message defined below
         await self.channel_layer.group_send(
-            self.room_group_name, {
-                "type": "return.gpt.message",
-                "message": message
-            }
+            self.room_group_name, {"type": "return.gpt.message", "message": message}
         )
 
     @database_sync_to_async
@@ -54,19 +51,18 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
     def get_recent_chat_messages(self, request, cal_num=10):
         chatroom_id = request.context.chatroom_id
 
-        recent_messages = Chat.objects.filter(
-            chatroom=chatroom_id).order_by('-created_at')[:cal_num]
+        recent_messages = Chat.objects.filter(chatroom=chatroom_id).order_by(
+            '-created_at'
+        )[:cal_num]
         recent_messages = list(recent_messages)
 
         # Check token's length
-        cur_recents_tokens = sum(
-            [message.tokens for message in recent_messages])
+        cur_recents_tokens = sum([message.tokens for message in recent_messages])
 
         while cur_recents_tokens >= 4096:
             removed_msg = recent_messages.pop()
             cur_recents_tokens -= removed_msg.tokens
-            logger.debug(
-                f'[get_recent_msg][too_many_tokens][remove] {removed_msg.id}')
+            logger.debug(f'[get_recent_msg][too_many_tokens][remove] {removed_msg.id}')
 
         return recent_messages
 
@@ -74,14 +70,16 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
     def save_request_chat_message(self, request):
         chatroom = ChatRoom.objects.get(id=request.context.chatroom_id)
         request_chat_message = Chat(
-            role="user", content=request.context.content, chatroom=chatroom)
+            role="user", content=request.context.content, chatroom=chatroom
+        )
         request_chat_message.save()
 
     @database_sync_to_async
     def save_gpt_response_message(self, request, content):
         chatroom = ChatRoom.objects.get(id=request.context.chatroom_id)
         gpt_response_message = Chat(
-            role="assistant", content=content, chatroom=chatroom)
+            role="assistant", content=content, chatroom=chatroom
+        )
         gpt_response_message.save()
 
     def build_gpt_message_response(self, request, content, serialize=True):
@@ -127,7 +125,8 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
 
         # Format Recent Chat Messages
         gpt_request_messages = formate_chats_to_gpt_request_messages(
-            recent_chat_messages[::-1])
+            recent_chat_messages[::-1]
+        )
 
         try:
             gpt_content = chatbot.send(gpt_request_messages)

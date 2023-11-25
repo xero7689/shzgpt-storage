@@ -1,7 +1,16 @@
 from django.contrib import admin
 from django.db.models import Count
 
-from .models import ChatUser, ChatRoom, Chat, PromptTopic, Prompt, APIKey, AIVendor, AIModel
+from .models import (
+    ChatUser,
+    ChatRoom,
+    Chat,
+    PromptTopic,
+    Prompt,
+    APIKey,
+    AIVendor,
+    AIModel,
+)
 
 # Register your models here.
 
@@ -17,10 +26,7 @@ class ChatUserAdmin(admin.ModelAdmin):
 
 @admin.register(AIVendor)
 class AIVendor(admin.ModelAdmin):
-    list_display = [
-        'id',
-        'name'
-    ]
+    list_display = ['id', 'name']
 
 
 @admin.register(AIModel)
@@ -34,13 +40,7 @@ class AIModel(admin.ModelAdmin):
 
 @admin.register(APIKey)
 class APIKey(admin.ModelAdmin):
-    list_display = [
-        'id',
-        'owner',
-        'model',
-        'desc',
-        'created_at'
-    ]
+    list_display = ['id', 'owner', 'model', 'desc', 'created_at']
 
 
 @admin.register(ChatRoom)
@@ -70,32 +70,14 @@ class ChatRoomAdmin(admin.ModelAdmin):
 
 @admin.register(Chat)
 class ChatAdmin(admin.ModelAdmin):
-    list_display = [
-        'id',
-        'created_at',
-        'chatroom',
-        'role',
-        'tokens',
-        'content'
-    ]
+    list_display = ['id', 'created_at', 'chatroom', 'role', 'tokens', 'content']
 
 
 @admin.register(PromptTopic)
 class PromptTopicAdmin(admin.ModelAdmin):
-    list_display = [
-        'id',
-        'name',
-        'owner',
-        'created_at'
-    ]
+    list_display = ['id', 'name', 'owner', 'created_at']
 
 
 @admin.register(Prompt)
 class PromptAdmin(admin.ModelAdmin):
-    list_display = [
-        'id',
-        'prompt_topic',
-        'usage_count',
-        'content',
-        'created_at'
-    ]
+    list_display = ['id', 'prompt_topic', 'usage_count', 'content', 'created_at']

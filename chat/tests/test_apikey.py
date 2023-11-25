@@ -17,23 +17,25 @@ class APIKeyViewTest(TestCase):
         self.username = 'testuser'
         self.password = 'testpass'
         self.user = User.objects.create_user(
-            username=self.username, password=self.password)
+            username=self.username, password=self.password
+        )
 
-        self.chat_user = ChatUser.objects.create(
-            user=self.user, name=self.username)
+        self.chat_user = ChatUser.objects.create(user=self.user, name=self.username)
 
         self.chatroom = ChatRoom.objects.create(
-            name='Test Chat Room 1', owner=self.chat_user)
+            name='Test Chat Room 1', owner=self.chat_user
+        )
 
         self.ai_vendor = AIVendor.objects.create(name="Test AI Vendor")
         self.ai_model = AIModel.objects.create(
-            name="Test AI Model", vendor=self.ai_vendor)
+            name="Test AI Model", vendor=self.ai_vendor
+        )
 
         self.api_key = APIKey.objects.create(
             owner=self.chat_user,
             key="sx-CJdBhagPQ5UTXRJsXmdOT4BlbkFJKAEyBi1FzHRSlWNJnPJD",
             desc="Test API Key",
-            model=self.ai_model
+            model=self.ai_model,
         )
 
     def test_get_apikey(self):
@@ -54,11 +56,10 @@ class APIKeyViewTest(TestCase):
         data = {
             'key': 'sx-CJdBhagPQ5UTXRJsXmdOT7BLbkFJKAEyBi1FzHRSlWNJnPJD',
             'desc': 'test_user_post_api_key',
-            'model': 1
+            'model': 1,
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, 201)
 
         saved_api_key = APIKey.objects.all()[1]
-        self.assertEqual(mask_api_key(saved_api_key.key),
-                         mask_api_key(data['key']))
+        self.assertEqual(mask_api_key(saved_api_key.key), mask_api_key(data['key']))

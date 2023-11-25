@@ -1,12 +1,9 @@
-from datetime import datetime
 from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 from django.contrib.auth.models import User
 from chat.models import ChatRoom, ChatUser
-from chat.serializer import ChatRoomSerializer
-from chat.views import ChatRoomAPIView
 
 
 class ChatRoomAPIViewTest(TestCase):
@@ -16,13 +13,14 @@ class ChatRoomAPIViewTest(TestCase):
         self.username = 'testuser'
         self.password = 'testpass'
         self.user = User.objects.create_user(
-                username=self.username, password=self.password)
+            username=self.username, password=self.password
+        )
 
-        self.chat_user = ChatUser.objects.create(
-            user=self.user, name=self.username)
+        self.chat_user = ChatUser.objects.create(user=self.user, name=self.username)
 
         self.chatroom = ChatRoom.objects.create(
-            name='Test Chat Room 1', owner=self.chat_user)
+            name='Test Chat Room 1', owner=self.chat_user
+        )
 
     def test_get_queryset(self):
         self.client.force_login(self.user)
