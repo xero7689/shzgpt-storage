@@ -32,11 +32,12 @@ class SocketServerTests(TestCase):
             reverse('login'), {'username': self.username, 'password': self.password}
         )
 
-    @patch('chat.consumers.OpenAIAPIWrapper')
+    @patch('chat.consumers.OpenAI')
     async def test_my_consumer(self, MockOpenAIAPIWrapper):
         gpt_content_mock = "This is a mock GPT response"
         api_wrapper_mock = MagicMock()
-        api_wrapper_mock.send.return_value = gpt_content_mock
+        api_wrapper_mock.response_content = gpt_content_mock
+        api_wrapper_mock.response_tokens = 17
         MockOpenAIAPIWrapper.return_value = api_wrapper_mock
 
         headers = [

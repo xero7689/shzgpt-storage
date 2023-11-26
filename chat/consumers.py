@@ -6,8 +6,8 @@ from channels.auth import login
 
 from chat.models import APIKey, Chat, ChatRoom
 
-from common.api_wrapper import OpenAIAPIWrapper
-from common.utils import formate_chats_to_gpt_request_messages
+from common.llm_vendor import OpenAI
+from common.tokenizer import num_tokens_from_message
 from common.pb.message_pb2 import ChatRequest, ChatResponse, StatusCode, ChatRoleType
 
 from google.protobuf.json_format import Parse, MessageToJson
@@ -69,16 +69,24 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def save_request_chat_message(self, request):
         chatroom = ChatRoom.objects.get(id=request.context.chatroom_id)
+        request_message = {
+            'role': ChatRoleType.Name(request.context.role).title(),
+            'content': request.context.content,
+        }
+        tokens = num_tokens_from_message(request_message)
         request_chat_message = Chat(
-            role="user", content=request.context.content, chatroom=chatroom
+            role="user",
+            content=request.context.content,
+            chatroom=chatroom,
+            tokens=tokens,
         )
         request_chat_message.save()
 
     @database_sync_to_async
-    def save_gpt_response_message(self, request, content):
+    def save_gpt_response_message(self, request, content: str, tokens: int) -> None:
         chatroom = ChatRoom.objects.get(id=request.context.chatroom_id)
         gpt_response_message = Chat(
-            role="assistant", content=content, chatroom=chatroom
+            role="assistant", content=content, chatroom=chatroom, tokens=tokens
         )
         gpt_response_message.save()
 
@@ -121,22 +129,18 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
         api_key = await self.get_api_key()
         recent_chat_messages = await self.get_recent_chat_messages(request)
 
-        chatbot = OpenAIAPIWrapper(api_key)
-
-        # Format Recent Chat Messages
-        gpt_request_messages = formate_chats_to_gpt_request_messages(
-            recent_chat_messages[::-1]
-        )
+        llm = OpenAI(api_key)
 
         try:
-            gpt_content = chatbot.send(gpt_request_messages)
+            llm.send(recent_chat_messages[::-1])
 
             # Save GPT Content to Database
-            await self.save_gpt_response_message(request, gpt_content)
+            await self.save_gpt_response_message(
+                request, llm.response_content, llm.response_tokens
+            )
 
             # Send Response
-            # await self.send(text_data=json.dumps({"message": message}))
-            response = self.build_gpt_message_response(request, gpt_content)
+            response = self.build_gpt_message_response(request, llm.response_content)
         except Exception as error:
             # Handling OpenAIs 500 Internal Server Error
             response = self.build_gpt_message_response(request, str(error))

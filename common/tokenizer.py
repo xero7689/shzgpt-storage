@@ -26,12 +26,12 @@ def num_tokens_from_message(message, model="gpt-3.5-turbo-0613"):
         print(
             "Warning: gpt-3.5-turbo may update over time. Returning num tokens assuming gpt-3.5-turbo-0613."
         )
-        return num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613")
+        return num_tokens_from_message(message, model="gpt-3.5-turbo-0613")
     elif "gpt-4" in model:
         print(
             "Warning: gpt-4 may update over time. Returning num tokens assuming gpt-4-0613."
         )
-        return num_tokens_from_messages(messages, model="gpt-4-0613")
+        return num_tokens_from_message(message, model="gpt-4-0613")
     else:
         raise NotImplementedError(
             f"""num_tokens_from_messages() is not implemented for model {model}. See https://github.com/openai/openai-python/blob/main/chatml.md for information on how messages are converted to tokens."""
