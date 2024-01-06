@@ -5,6 +5,7 @@ from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth import authenticate, login
 from django.core.cache import cache
+from django.shortcuts import get_object_or_404
 
 from django.http import JsonResponse
 
@@ -51,7 +52,11 @@ class CustomLogInView(APIView):
         if user is not None:
             login(request, user)
 
-            chatUser = ChatUser.objects.get(user=user)
+            # Todo:
+            # We should Make ChatUser directly as The AbstractUser
+            # Then we dont need to query the ChatUser again
+            # after authenticate the user
+            chatUser = get_object_or_404(ChatUser, user=user)
 
             serializer = ChatUserSerializer(chatUser)
             content = build_response_content(

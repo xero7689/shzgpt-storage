@@ -19,5 +19,10 @@ channels-redis==4.1.0
 protobuf==4.24.0
 
 uvicorn[standard]==0.23.2
-openai==0.27.8
+openai==1.6.1
 tiktoken==0.5.1
+
+pytest==7.4.4
+pytest-django==4.7.0
+pytest-xdist==3.5.0
+pytest-cov==4.1.0

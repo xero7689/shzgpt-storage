@@ -1,7 +1,6 @@
 from abc import ABC, abstractclassmethod
 
-import openai
-
+from openai import OpenAI
 
 class LLMVendorConfig(ABC):
     @abstractclassmethod
@@ -30,20 +29,22 @@ class LLMVendor(ABC):
     def _process_response(self):
         pass
 
-
-class OpenAI(LLMVendor):
-    response: openai.openai_object.OpenAIObject
-
+class OpenAILLM(LLMVendor):
     def __init__(self, api_key, model="gpt-3.5-turbo"):
         super().__init__(api_key)
-        self.openai = openai
-        self.openai.api_key = api_key
+        self.client = OpenAI(api_key=api_key)
         self.model = model
         self.response_transformers = []
 
-    def send(self, messages):
+    def send(self, messages: list[dict]):
         messages = self._preprocess_messages(messages)
         self.response = self._make_api_request(messages)
+
+    def stream_send(self, messages: list[dict]):
+        stream = self._make_api_request(messages, stream=True)
+        for chunk in stream:
+            if chunk.choices[0].delta.content is not None:
+                yield chunk.choices[0].delta.content
 
     @property
     def response_content(self) -> str:
@@ -72,12 +73,14 @@ class OpenAI(LLMVendor):
         processed_messages = []
         for message in messages:
             processed_messages.append(
-                {"role": message.role, "content": message.content}
+                {"role": message["role"], "content": message["content"]}
             )
         return processed_messages
 
-    def _make_api_request(self, messages):
-        return self.openai.ChatCompletion.create(model=self.model, messages=messages)
+    def _make_api_request(self, messages, stream=False):
+        return self.client.chat.completions.create(
+            model=self.model, messages=messages, stream=stream
+        )
 
     def _process_response(self):
         return self.response

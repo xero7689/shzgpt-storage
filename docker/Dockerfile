@@ -12,6 +12,12 @@ RUN echo "https://${GIT_USER}:${GIT_PASSWORD}@gitlab.com" >> /root/.git-credenti
 COPY requirements.txt .
 RUN pip install -r requirements.txt -t /python_package
 
+ARG IS_DEBUG
+ENV IS_DEBUG=$IS_DEBUG
+COPY requirements-dev.txt .
+RUN if [ "$IS_DEBUG" = "True" ] ; then pip install -r requirements-dev.txt -t /python_package ; fi
+
+
 FROM python:3.9.10 AS deploy-image
 COPY --from=build-image /python_package /python_package
 

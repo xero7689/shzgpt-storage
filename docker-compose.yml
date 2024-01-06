@@ -1,6 +1,41 @@
 version: "3"
+
+x-svc-config: &svc-config
+  depends_on:
+    - shz-gpt-db
+    - shz-gpt-cache
+
+  env_file:
+    - ./.env
+
+  environment:
+    IN_CONTAINER:
+    IS_DEBUG:
+    CONTAINER_STORAGE_PATH:
+    LOGGING_FILE_NAME:
+    DEPLOY_STAGE:
+    DJANGO_SECRET_KEY:
+    DATABASE_URI:
+    DATABASE_DB_NAME:
+    DATABASE_USER:
+    DATABASE_PASSWD:
+    CACHE_URI:
+    CACHE_URI_PORT:
+    DJANGO_SUPERUSER_USERNAME:
+    DJANGO_SUPERUSER_PASSWORD:
+    DJANGO_SUPERUSER_EMAIL:
+    DJANGO_ADMIN_URL_PATH:
+    AWS_S3_REGION:
+    AWS_STORAGE_BUCKET_NAME:
+    AWS_S3_CACHE_CONTROL_MAX_AGE:
+    GIT_USER:
+    GIT_PASSWORD:
+    CORS_ALLOWED_ORIGIN:
+    COOKIES_ALLOWED_DOMAIN:
+
 services:
   shz-gpt-app:
+    <<: *svc-config
     container_name: "shz-gpt-storage-app"
     image: shz_gpt_storage:${IMAGE_VERSION:-latest}
     build:
@@ -9,6 +44,7 @@ services:
       args:
         GIT_USER:
         GIT_PASSWD:
+        IS_DEBUG:
         DJANGO_SUPERUSER_USERNAME:
         DJANGO_SUPERUSER_PASSWORD:
         DJANGO_SUPERUSER_EMAIL:
@@ -18,36 +54,10 @@ services:
       - shz_gpt_app_data:${CONTAINER_STORAGE_PATH}
     ports:
       - "8000:8000"
-    environment:
-      IN_CONTAINER:
-      IS_DEBUG:
-      CONTAINER_STORAGE_PATH:
-      LOGGING_FILE_NAME:
-      DEPLOY_STAGE:
-      DJANGO_SECRET_KEY:
-      DATABASE_URI:
-      DATABASE_DB_NAME:
-      DATABASE_USER:
-      DATABASE_PASSWD:
-      CACHE_URI:
-      CACHE_URI_PORT:
-      DJANGO_SUPERUSER_USERNAME:
-      DJANGO_SUPERUSER_PASSWORD:
-      DJANGO_SUPERUSER_EMAIL:
-      DJANGO_ADMIN_URL_PATH:
-      AWS_S3_REGION:
-      AWS_STORAGE_BUCKET_NAME:
-      AWS_S3_CACHE_CONTROL_MAX_AGE:
-      GIT_USER:
-      GIT_PASSWORD:
-      CORS_ALLOWED_ORIGIN:
-      COOKIES_ALLOWED_DOMAIN:
-    depends_on:
-      - shz-gpt-db
-      - shz-gpt-cache
+
   shz-gpt-db:
     container_name: "shz-gpt-storage-db"
-    image: postgres:latest
+    image: postgres:15.3
     environment:
       POSTGRES_DB: "${DATABASE_DB_NAME:-for-development}"
       POSTGRES_USER: "${DATABASE_USER:-devel}"
