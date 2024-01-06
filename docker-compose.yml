@@ -57,7 +57,7 @@ services:
 
   shz-gpt-db:
     container_name: "shz-gpt-storage-db"
-    image: postgres:15.3
+    image: postgres:latest
     environment:
       POSTGRES_DB: "${DATABASE_DB_NAME:-for-development}"
       POSTGRES_USER: "${DATABASE_USER:-devel}"
