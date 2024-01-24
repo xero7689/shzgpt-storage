@@ -1,17 +1,15 @@
 import logging
 
-from channels.generic.websocket import AsyncWebsocketConsumer
-from channels.db import database_sync_to_async
 from channels.auth import login
+from channels.db import database_sync_to_async
+from channels.generic.websocket import AsyncWebsocketConsumer
+from google.protobuf.json_format import MessageToJson, Parse
 
 from chat.models import APIKey, Chat, ChatRoom
-
 from common.llm_vendor import OpenAILLM
+from common.pb.message_pb2 import (ChatRequest, ChatResponse, ChatRoleType,
+                                   StatusCode)
 from common.tokenizer import num_tokens_from_message
-from common.pb.message_pb2 import ChatRequest, ChatResponse, StatusCode, ChatRoleType
-
-from google.protobuf.json_format import Parse, MessageToJson
-
 
 logger = logging.getLogger(__name__)
 

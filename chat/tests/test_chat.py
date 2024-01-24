@@ -1,9 +1,10 @@
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
-from django.contrib.auth.models import User
-from chat.models import ChatRoom, ChatUser, Chat
+
+from chat.models import Chat, ChatRoom, ChatUser
 
 
 class ChatRoomAPIViewTest(TestCase):

@@ -2,6 +2,7 @@ from abc import ABC, abstractclassmethod
 
 from openai import OpenAI
 
+
 class LLMVendorConfig(ABC):
     @abstractclassmethod
     def get_config(self):

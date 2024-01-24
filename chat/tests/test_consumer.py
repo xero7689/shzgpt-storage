@@ -1,14 +1,12 @@
 from unittest.mock import MagicMock, patch
 
-from django.test import TestCase, Client
+from channels.testing import WebsocketCommunicator
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
 from django.urls import reverse
 
-from channels.testing import WebsocketCommunicator
 from chat.consumers import AsyncChatConsumer
-
-from django.contrib.auth.models import User
-from chat.models import ChatUser, ChatRoom
-
+from chat.models import ChatRoom, ChatUser
 from common.pb.message_pb2 import ChatRequest, ChatResponse, ChatRoleType
 
 

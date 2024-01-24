@@ -1,16 +1,8 @@
 from django.contrib import admin
 from django.db.models import Count
 
-from .models import (
-    ChatUser,
-    ChatRoom,
-    Chat,
-    PromptTopic,
-    Prompt,
-    APIKey,
-    AIVendor,
-    AIModel,
-)
+from .models import (AIModel, AIVendor, APIKey, Chat, ChatRoom, ChatUser,
+                     Prompt, PromptTopic)
 
 # Register your models here.
 

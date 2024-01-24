@@ -1,11 +1,12 @@
-from django.test import TestCase
-from django.urls import reverse
+from datetime import datetime, timezone
 
 from django.contrib.auth.models import User
-from rest_framework.test import APIClient
+from django.test import TestCase
+from django.urls import reverse
 from rest_framework import status
-from datetime import datetime, timezone
-from chat.models import ChatRoom, Chat, ChatUser
+from rest_framework.test import APIClient
+
+from chat.models import Chat, ChatRoom, ChatUser
 from chat.serializer import ChatSerializer
 
 

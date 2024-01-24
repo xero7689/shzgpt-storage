@@ -1,17 +1,11 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import include, path
-from .views import (
-    CustomLogInView,
-    CustomLogOutView,
-    ChatUserAPIView,
-    ChatRoomAPIView,
-    ChatsAPIView,
-    ChatAPIView,
-    ChatHistoryAPIView,
-    PromptTopicAPIView,
-    PromptAPIView,
-    APIKeyView,
-    ChatSocketInitView,
-)
+
+from .views import (APIKeyView, ChatAPIView, ChatHistoryAPIView,
+                    ChatRoomAPIView, ChatsAPIView, ChatSocketInitView,
+                    ChatUserAPIView, CustomLogInView, CustomLogOutView,
+                    PromptAPIView, PromptTopicAPIView)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
@@ -32,4 +26,4 @@ urlpatterns = [
     path('login/', CustomLogInView.as_view(), name='login'),
     path('logout/', CustomLogOutView.as_view(), name='logout'),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

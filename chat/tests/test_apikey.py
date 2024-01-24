@@ -1,11 +1,11 @@
 import logging
 
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
-
 from rest_framework.test import APIClient
-from django.contrib.auth.models import User
-from chat.models import ChatUser, ChatRoom, APIKey, AIModel, AIVendor
+
+from chat.models import AIModel, AIVendor, APIKey, ChatRoom, ChatUser
 from chat.utils import mask_api_key
 
 
