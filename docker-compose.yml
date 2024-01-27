@@ -51,9 +51,12 @@ services:
     command: [ "python", "main.py" ]
     volumes:
       - .:/workspace
-      - shz_gpt_app_data:${CONTAINER_STORAGE_PATH}
+      - ${HOST_STORAGE_PATH}:${CONTAINER_STORAGE_PATH}
     ports:
-      - "8000:8000"
+      - ${HOST_MAPPING_PORT}:8000
+    depends_on:
+      - shz-gpt-db
+      - shz-gpt-cache
 
   shz-gpt-db:
     container_name: "shz-gpt-storage-db"
@@ -70,5 +73,3 @@ services:
 
 volumes:
   shz_gpt_db_data:
-  shz_gpt_app_data:
-    external: false
