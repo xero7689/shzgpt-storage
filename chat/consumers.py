@@ -1,17 +1,15 @@
 import logging
 
-from channels.generic.websocket import AsyncWebsocketConsumer
-from channels.db import database_sync_to_async
 from channels.auth import login
+from channels.db import database_sync_to_async
+from channels.generic.websocket import AsyncWebsocketConsumer
+from google.protobuf.json_format import MessageToJson, Parse
 
 from chat.models import APIKey, Chat, ChatRoom
-
-from common.llm_vendor import OpenAI
+from common.llm_vendor import OpenAILLM
+from common.pb.message_pb2 import (ChatRequest, ChatResponse, ChatRoleType,
+                                   StatusCode)
 from common.tokenizer import num_tokens_from_message
-from common.pb.message_pb2 import ChatRequest, ChatResponse, StatusCode, ChatRoleType
-
-from google.protobuf.json_format import Parse, MessageToJson
-
 
 logger = logging.getLogger(__name__)
 
@@ -53,11 +51,10 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
 
         recent_messages = Chat.objects.filter(chatroom=chatroom_id).order_by(
             '-created_at'
-        )[:cal_num]
-        recent_messages = list(recent_messages)
+        ).values()[:cal_num]
 
         # Check token's length
-        cur_recents_tokens = sum([message.tokens for message in recent_messages])
+        cur_recents_tokens = sum([message["tokens"] for message in recent_messages])
 
         while cur_recents_tokens >= 4096:
             removed_msg = recent_messages.pop()
@@ -129,7 +126,7 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
         api_key = await self.get_api_key()
         recent_chat_messages = await self.get_recent_chat_messages(request)
 
-        llm = OpenAI(api_key)
+        llm = OpenAILLM(api_key)
 
         try:
             llm.send(recent_chat_messages[::-1])

@@ -1,5 +1,5 @@
-import os
 import ast
+import os
 
 # General Settings
 APP_NAME = os.environ.get('APP_NAME', 'blog')

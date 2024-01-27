@@ -1,14 +1,12 @@
 from unittest.mock import MagicMock, patch
 
-from django.test import TestCase, Client
+from channels.testing import WebsocketCommunicator
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
 from django.urls import reverse
 
-from channels.testing import WebsocketCommunicator
 from chat.consumers import AsyncChatConsumer
-
-from django.contrib.auth.models import User
-from chat.models import ChatUser, ChatRoom
-
+from chat.models import ChatRoom, ChatUser
 from common.pb.message_pb2 import ChatRequest, ChatResponse, ChatRoleType
 
 
@@ -32,7 +30,7 @@ class SocketServerTests(TestCase):
             reverse('login'), {'username': self.username, 'password': self.password}
         )
 
-    @patch('chat.consumers.OpenAI')
+    @patch('chat.consumers.OpenAILLM')
     async def test_my_consumer(self, MockOpenAIAPIWrapper):
         gpt_content_mock = "This is a mock GPT response"
         api_wrapper_mock = MagicMock()

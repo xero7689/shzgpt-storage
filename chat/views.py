@@ -1,33 +1,22 @@
 import logging
-
 from datetime import datetime
 
-from django.utils import timezone
+from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.core.cache import cache
-
 from django.http import JsonResponse
-
-from django.conf import settings
-
-from rest_framework.views import APIView
-from rest_framework import generics
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from rest_framework import authentication, generics, permissions, status
 from rest_framework.response import Response
-from rest_framework import authentication, permissions
-from rest_framework import status
 from rest_framework.serializers import ReturnDict
+from rest_framework.views import APIView
 
-from .models import ChatUser, ChatRoom, Chat, PromptTopic, Prompt, APIKey
-from .serializer import (
-    ChatUserSerializer,
-    ChatRoomSerializer,
-    ChatSerializer,
-    PromptTopicSerializer,
-    PromptSerializer,
-    APIKeySerializer,
-)
+from .models import APIKey, Chat, ChatRoom, ChatUser, Prompt, PromptTopic
+from .serializer import (APIKeySerializer, ChatRoomSerializer, ChatSerializer,
+                         ChatUserSerializer, PromptSerializer,
+                         PromptTopicSerializer)
 from .utils import build_response_content, mask_api_key
-
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +40,11 @@ class CustomLogInView(APIView):
         if user is not None:
             login(request, user)
 
-            chatUser = ChatUser.objects.get(user=user)
+            # Todo:
+            # We should Make ChatUser directly as The AbstractUser
+            # Then we dont need to query the ChatUser again
+            # after authenticate the user
+            chatUser = get_object_or_404(ChatUser, user=user)
 
             serializer = ChatUserSerializer(chatUser)
             content = build_response_content(
