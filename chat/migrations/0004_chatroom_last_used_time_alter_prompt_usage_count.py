@@ -5,21 +5,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('chat', '0003_prompt_name'),
+        ("chat", "0003_prompt_name"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='chatroom',
-            name='last_used_time',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now, verbose_name='Topic Created Date'),
+            model_name="chatroom",
+            name="last_used_time",
+            field=models.DateTimeField(
+                auto_now_add=True,
+                default=django.utils.timezone.now,
+                verbose_name="Topic Created Date",
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='prompt',
-            name='usage_count',
+            model_name="prompt",
+            name="usage_count",
             field=models.IntegerField(default=0),
         ),
     ]

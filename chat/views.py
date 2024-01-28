@@ -13,9 +13,14 @@ from rest_framework.serializers import ReturnDict
 from rest_framework.views import APIView
 
 from .models import APIKey, Chat, ChatRoom, ChatUser, Prompt, PromptTopic
-from .serializer import (APIKeySerializer, ChatRoomSerializer, ChatSerializer,
-                         ChatUserSerializer, PromptSerializer,
-                         PromptTopicSerializer)
+from .serializer import (
+    APIKeySerializer,
+    ChatRoomSerializer,
+    ChatSerializer,
+    ChatUserSerializer,
+    PromptSerializer,
+    PromptTopicSerializer,
+)
 from .utils import build_response_content, mask_api_key
 
 logger = logging.getLogger(__name__)
@@ -23,8 +28,8 @@ logger = logging.getLogger(__name__)
 
 class CustomLogInView(APIView):
     def post(self, request, *args, **kwargs) -> JsonResponse:
-        username: str = request.data.get('username')
-        password: str = request.data.get('password')
+        username: str = request.data.get("username")
+        password: str = request.data.get("password")
 
         if not username or not password:
             content = build_response_content(
@@ -53,14 +58,14 @@ class CustomLogInView(APIView):
 
             response = JsonResponse(content, safe=False)
             response.set_cookie(
-                'c_user', chatUser.id, domain=settings.COOKIES_ALLOWED_DOMAIN
+                "c_user", chatUser.id, domain=settings.COOKIES_ALLOWED_DOMAIN
             )
 
             api_key = APIKey.objects.filter(owner__user=user).first()
             if api_key:
                 masked_key = mask_api_key(api_key.key)
                 response.set_cookie(
-                    'c_api_key', str(masked_key), domain=settings.COOKIES_ALLOWED_DOMAIN
+                    "c_api_key", str(masked_key), domain=settings.COOKIES_ALLOWED_DOMAIN
                 )
 
             return response
@@ -80,14 +85,14 @@ class CustomLogOutView(APIView):
     def post(self, request, format=None):
         if self.request.user.is_authenticated:
             response = Response(
-                {'status': 'succeeded', 'detail': 'Successfully logged out'}
+                {"status": "succeeded", "detail": "Successfully logged out"}
             )
-            response.delete_cookie('sessionid', domain=settings.COOKIES_ALLOWED_DOMAIN)
-            response.delete_cookie('csrftoken', domain=settings.COOKIES_ALLOWED_DOMAIN)
-            response.delete_cookie('c_user', domain=settings.COOKIES_ALLOWED_DOMAIN)
-            response.delete_cookie('c_api_key', domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.delete_cookie("sessionid", domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.delete_cookie("csrftoken", domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.delete_cookie("c_user", domain=settings.COOKIES_ALLOWED_DOMAIN)
+            response.delete_cookie("c_api_key", domain=settings.COOKIES_ALLOWED_DOMAIN)
         else:
-            response = Response({'status': 'failed', 'detail': 'Logged out failed'})
+            response = Response({"status": "failed", "detail": "Logged out failed"})
         return response
 
 
@@ -108,13 +113,13 @@ class ChatRoomAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset_cache_key = f'views.queryset.cache.chatroomapi.{user}'
+        queryset_cache_key = f"views.queryset.cache.chatroomapi.{user}"
         cached_queryset = cache.get(queryset_cache_key)
 
         if cached_queryset is not None:
             queryset = cached_queryset
         else:
-            queryset = ChatRoom.objects.filter(owner__user=user).order_by('created_at')
+            queryset = ChatRoom.objects.filter(owner__user=user).order_by("created_at")
             cache.set(queryset_cache_key, queryset, 60 * 60)
 
         return queryset
@@ -123,15 +128,15 @@ class ChatRoomAPIView(generics.ListCreateAPIView):
         serializer.save(owner=ChatUser.objects.get(user=self.request.user))
 
         user = self.request.user
-        queryset_cache_key = f'views.queryset.cache.chatroomapi.{user}'
-        queryset = ChatRoom.objects.filter(owner__user=user).order_by('created_at')
+        queryset_cache_key = f"views.queryset.cache.chatroomapi.{user}"
+        queryset = ChatRoom.objects.filter(owner__user=user).order_by("created_at")
         cache.set(queryset_cache_key, queryset, 60 * 60)
 
 
 class ChatsAPIView(generics.ListCreateAPIView):
     authentication_classes = [authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Chat.objects.all().order_by('-created_at')
+    queryset = Chat.objects.all().order_by("-created_at")
     serializer_class = ChatSerializer
 
 
@@ -186,23 +191,23 @@ class ChatHistoryAPIView(APIView):
         if not chatroom:
             return Response(
                 {
-                    'status': 'failed',
-                    'detail': 'Invalid Chatroom ID',
+                    "status": "failed",
+                    "detail": "Invalid Chatroom ID",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Get the date_gte and date_lt parameters from the GET query
-        date_gte_str = request.GET.get('date_gte')
-        date_lt_str = request.GET.get('date_lt')
+        date_gte_str = request.GET.get("date_gte")
+        date_lt_str = request.GET.get("date_lt")
 
         # Set default start and end dates if not provided
-        chats = Chat.objects.filter(chatroom=chatroom).order_by('created_at')
+        chats = Chat.objects.filter(chatroom=chatroom).order_by("created_at")
         if not chats.exists():
             return Response(
                 {
-                    'status': 'failed',
-                    'detail': 'No chat history for the specified chatroom',
+                    "status": "failed",
+                    "detail": "No chat history for the specified chatroom",
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )
@@ -213,12 +218,12 @@ class ChatHistoryAPIView(APIView):
         # Parse datetime strings to objects and update start/end date accordingly
         try:
             if date_gte_str:
-                start_date = datetime.strptime(date_gte_str, '%Y-%m-%d %H:%M:%S')
+                start_date = datetime.strptime(date_gte_str, "%Y-%m-%d %H:%M:%S")
             if date_lt_str:
-                end_date = datetime.strptime(date_lt_str, '%Y-%m-%d %H:%M:%S')
+                end_date = datetime.strptime(date_lt_str, "%Y-%m-%d %H:%M:%S")
         except ValueError as ve:
             return Response(
-                {'status': 'failed', 'detail': str(ve)},
+                {"status": "failed", "detail": str(ve)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -229,7 +234,7 @@ class ChatHistoryAPIView(APIView):
         # Fetch chats based on start and end dates
         chats = Chat.objects.filter(
             chatroom=chatroom, created_at__gte=start_date, created_at__lt=end_date
-        ).order_by('-created_at')
+        ).order_by("-created_at")
 
         # If date_gte or date_lt is not provided, limit number of results to DEFAULT_CHAT_LIMIT
         if not date_gte_str and not date_lt_str:
@@ -243,7 +248,7 @@ class PromptTopicAPIView(generics.ListAPIView):
     authentication_classes = [authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
-    queryset = PromptTopic.objects.all().order_by('created_at')
+    queryset = PromptTopic.objects.all().order_by("created_at")
     serializer_class = PromptTopicSerializer
 
 
@@ -251,7 +256,7 @@ class PromptAPIView(generics.ListCreateAPIView):
     authentication_classes = [authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
-    queryset = Prompt.objects.all().order_by('created_at')
+    queryset = Prompt.objects.all().order_by("created_at")
     serializer_class = PromptSerializer
 
 
@@ -262,7 +267,7 @@ class APIKeyView(APIView):
 
     def get(self, request, *args, **kwargs):
         user = self.request.user
-        api_keys = APIKey.objects.filter(owner__user=user).order_by('created_at')
+        api_keys = APIKey.objects.filter(owner__user=user).order_by("created_at")
         masked_api_keys = []
 
         for api_key in api_keys:
@@ -271,7 +276,7 @@ class APIKeyView(APIView):
 
         # Modify the response as per your requirement
         response_data = {
-            'masked_api_keys': masked_api_keys,
+            "masked_api_keys": masked_api_keys,
         }
         return Response(response_data, status=status.HTTP_200_OK)
 

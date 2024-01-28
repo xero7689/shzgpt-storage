@@ -6,23 +6,38 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('chat', '0004_chatroom_last_used_time_alter_prompt_usage_count'),
+        ("chat", "0004_chatroom_last_used_time_alter_prompt_usage_count"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='chatroom',
-            name='last_used_time',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Last Used Time'),
+            model_name="chatroom",
+            name="last_used_time",
+            field=models.DateTimeField(
+                auto_now_add=True, verbose_name="Last Used Time"
+            ),
         ),
         migrations.CreateModel(
-            name='ChatUser',
+            name="ChatUser",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]
