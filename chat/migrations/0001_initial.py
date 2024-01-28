@@ -5,48 +5,109 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='ChatRoom',
+            name="ChatRoom",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=128, unique=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Topic Created Date')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=128, unique=True)),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Topic Created Date"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='PromptTopic',
+            name="PromptTopic",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=128, unique=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Topic Created Date')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=128, unique=True)),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Topic Created Date"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Prompt',
+            name="Prompt",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('content', models.TextField()),
-                ('usage_count', models.IntegerField()),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Topic Created Date')),
-                ('prompt_topic', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='chat.prompttopic')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("content", models.TextField()),
+                ("usage_count", models.IntegerField()),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Topic Created Date"
+                    ),
+                ),
+                (
+                    "prompt_topic",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="chat.prompttopic",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Chat',
+            name="Chat",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('character', models.CharField(max_length=32)),
-                ('content', models.TextField()),
-                ('tokens', models.IntegerField()),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Topic Created Date')),
-                ('chatroom', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='chat.chatroom')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("character", models.CharField(max_length=32)),
+                ("content", models.TextField()),
+                ("tokens", models.IntegerField()),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Topic Created Date"
+                    ),
+                ),
+                (
+                    "chatroom",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="chat.chatroom"
+                    ),
+                ),
             ],
         ),
     ]

@@ -7,7 +7,7 @@ class ChatUser(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     name = models.CharField(max_length=64)
     created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name='Topic Created Date'
+        auto_now_add=True, verbose_name="Topic Created Date"
     )
 
     def __str__(self):
@@ -35,7 +35,7 @@ class APIKey(models.Model):
     desc = models.CharField(max_length=256, blank=True)
     model = models.ForeignKey(AIModel, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name='Topic Created Date'
+        auto_now_add=True, verbose_name="Topic Created Date"
     )
 
     def __str__(self):
@@ -47,11 +47,11 @@ class ChatRoom(models.Model):
     name = models.CharField(unique=True, max_length=128)
 
     created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name='Topic Created Date'
+        auto_now_add=True, verbose_name="Topic Created Date"
     )
 
     last_used_time = models.DateTimeField(
-        auto_now_add=True, verbose_name='Last Used Time'
+        auto_now_add=True, verbose_name="Last Used Time"
     )
 
     def __str__(self):
@@ -68,7 +68,7 @@ class Chat(models.Model):
     chatroom = models.ForeignKey(ChatRoom, on_delete=models.CASCADE)
 
     created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name='Topic Created Date'
+        auto_now_add=True, verbose_name="Topic Created Date"
     )
 
     def save(self, *args, **kwargs):
@@ -86,7 +86,7 @@ class PromptTopic(models.Model):
     name = models.CharField(unique=True, max_length=128)
 
     created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name='Topic Created Date'
+        auto_now_add=True, verbose_name="Topic Created Date"
     )
 
     def __str__(self):
@@ -103,5 +103,5 @@ class Prompt(models.Model):
     usage_count = models.IntegerField(default=0)
 
     created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name='Topic Created Date'
+        auto_now_add=True, verbose_name="Topic Created Date"
     )

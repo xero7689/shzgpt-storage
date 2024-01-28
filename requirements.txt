@@ -26,3 +26,6 @@ pytest==7.4.4
 pytest-django==4.7.0
 pytest-xdist==3.5.0
 pytest-cov==4.1.0
+
+pydantic==2.5.3
+orjson==3.9.12

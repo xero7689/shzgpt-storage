@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('chat', '0007_chatroom_owner'),
+        ("chat", "0007_chatroom_owner"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='chatuser',
-            name='apiKey',
+            model_name="chatuser",
+            name="apiKey",
             field=models.CharField(blank=True, max_length=256),
         ),
     ]

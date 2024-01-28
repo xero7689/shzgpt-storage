@@ -5,16 +5,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('chat', '0006_chatuser_created_at_chatuser_name'),
+        ("chat", "0006_chatuser_created_at_chatuser_name"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='chatroom',
-            name='owner',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, to='chat.chatuser'),
+            model_name="chatroom",
+            name="owner",
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.PROTECT,
+                to="chat.chatuser",
+            ),
             preserve_default=False,
         ),
     ]
