@@ -31,27 +31,24 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         await login(self.scope, self.scope["user"])
 
+        # Verify the messsage
         json_data = json.loads(text_data)
-        # request = ChatRequest.model_validate(json_data)
-
-        # Send the message to self.room_group_name except the sender
-
-        await self.channel_layer.group_send(
-            self.room_group_name, {"type": "return.gpt.message", "request": json_data}
-        )
-
-    async def return_gpt_message(self, event):
-        """
-        Return GPT Message to the Group
-
-        Warning: This method is not thread-safe
-        If there are multiple listenrs in the same group,
-        the LLM Rquest will perform multiple times
-        """
-        request = ChatRequest.model_validate(event["request"])
+        request = ChatRequest.model_validate(json_data)
 
         # Save Request to Database
         await self.save_request_chat_message(request)
+        broadcast_response = self.build_brodcast_response(request)
+
+        # Broadcast the request message to the group
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "group.return.message",
+                "return_json": broadcast_response.model_dump_json(),
+                "sender_channel_name": self.channel_name,
+                "role": ChatRole.USER,
+            },
+        )
 
         # Query OpenAI AP
         api_key = await self.get_api_key()
@@ -67,13 +64,33 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
                 request, llm.response_content, llm.response_tokens
             )
 
-            # Send Response
             response = self.build_gpt_message_response(request, llm.response_content)
         except Exception as error:
             # Handling OpenAIs 500 Internal Server Error
             response = self.build_gpt_message_response(request, str(error))
 
-        await self.send(text_data=response.model_dump_json())
+        # Broadcast the response to the group
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "group.return.message",
+                "return_json": response.model_dump_json(),
+                "sender_channel_name": self.channel_name,
+                "role": ChatRole.ASSISTANT,
+            },
+        )
+
+    async def group_return_message(self, event):
+        # Prevent sending message to original sender
+        if (
+            event["sender_channel_name"] == self.channel_name
+            and event["role"] == ChatRole.USER
+        ):
+            return
+
+        chat_instance = event["return_json"]
+
+        await self.send(text_data=chat_instance)
 
     @database_sync_to_async
     def get_api_key(self):
@@ -128,6 +145,21 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
             chatroom_id=request.context.chatroom_id,
             role=ChatRole.ASSISTANT,
             content=content,
+        )
+        response = ChatResponse(
+            status=ChatStatus.SUCCESS,
+            context=context,
+            status_detail="",
+            timestamp=int(datetime.now().timestamp()),
+        )
+
+        return response
+
+    def build_brodcast_response(self, request):
+        context = ChatContext(
+            chatroom_id=request.context.chatroom_id,
+            role=ChatRole.USER,
+            content=request.context.content,
         )
         response = ChatResponse(
             status=ChatStatus.SUCCESS,
