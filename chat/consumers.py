@@ -54,7 +54,7 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
         api_key = await self.get_api_key()
         recent_chat_messages = await self.get_recent_chat_messages(request)
 
-        llm = OpenAILLM(api_key)
+        llm = OpenAILLM(api_key, model="gpt-4-turbo-preview")
 
         try:
             llm.send(recent_chat_messages[::-1])
