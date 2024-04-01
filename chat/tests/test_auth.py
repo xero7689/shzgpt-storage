@@ -70,3 +70,21 @@ class CustomLoginViewTestCase(TestCase):
         response_json = json.loads(response.content.decode())
         self.assertEqual(response_json["status"], "failed")
         self.assertEqual(response.status_code, 401)
+
+    def test_sign_up(self):
+        client = Client()
+        response = client.post(
+            reverse("signup"),
+            {
+                "username": "testuser2",
+                "password": "testpass",
+                "email": "test-chat-user@gmail.com",
+            },
+        )
+
+        # Assert that the user is authenticated and the response is 'Logged in'
+        response_json = json.loads(response.content.decode())
+        self.assertEqual(response_json["status"], "succeeded")
+
+        assert User.objects.get(username="testuser2")
+        assert ChatUser.objects.get(user__username="testuser2")

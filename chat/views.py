@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 from django.conf import settings
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, get_user_model
 from django.core.cache import cache
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -24,6 +24,8 @@ from .serializer import (
 from .utils import build_response_content, mask_api_key
 
 logger = logging.getLogger(__name__)
+
+User = get_user_model()
 
 
 class CustomLogInView(APIView):
@@ -94,6 +96,36 @@ class CustomLogOutView(APIView):
         else:
             response = Response({"status": "failed", "detail": "Logged out failed"})
         return response
+
+
+class CustomSignUpView(APIView):
+    def post(self, request, *args, **kwargs):
+        username: str = request.data.get("username")
+        password: str = request.data.get("password")
+        email: str = request.data.get("email")
+
+        if not username or not password or not email:
+            content = build_response_content(
+                data=ReturnDict(serializer=ChatUserSerializer),
+                status="failed",
+                detail="Username/Password/Email is required",
+            )
+            return JsonResponse(content, status=status.HTTP_400_BAD_REQUEST, safe=False)
+
+        user = User.objects.create_user(
+            username=username, password=password, email=email
+        )
+
+        ChatUser.objects.create(user=user)
+
+        if user is not None:
+            login(request, user)
+            return Response({"status": "succeeded", "detail": "Successfully signed up"})
+
+        return Response(
+            {"status": "failed", "detail": "Failed to sign up"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 class ChatUserAPIView(APIView):
