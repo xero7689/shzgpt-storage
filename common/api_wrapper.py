@@ -33,7 +33,7 @@ class OpenAIAPIWrapper(BaseChatCompleteWrapper):
 
     def _make_api_request(self, messages):
         return self.vendor.ChatCompletion.create(
-            model="gpt-3.5-turbo", messages=messages
+            model="gpt-4o-mini", messages=messages
         )
 
     def _process_response(self, response):
