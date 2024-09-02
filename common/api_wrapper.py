@@ -1,7 +1,7 @@
 import openai
 
 
-class BaseChatCompleteWrapper():
+class BaseChatCompleteWrapper:
     def __init__(self, api_key):
         self.vendor = None
         self.api_key = api_key
@@ -32,7 +32,9 @@ class OpenAIAPIWrapper(BaseChatCompleteWrapper):
         return messages
 
     def _make_api_request(self, messages):
-        return self.vendor.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
+        return self.vendor.ChatCompletion.create(
+            model="gpt-4o-mini", messages=messages
+        )
 
     def _process_response(self, response):
         response = response['choices'][0]['message']['content']

@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
-    'chat'
+    'chat',
 ]
 
 MIDDLEWARE = [
@@ -107,9 +107,7 @@ else:
             'PASSWORD': environment.DATABASE_PASSWD,
             'HOST': environment.DATABASE_URI,
             'PORT': environment.DATABASE_URI_PORT,
-            'OPTIONS': {
-                'application_name': environment.APP_NAME
-            }
+            'OPTIONS': {'application_name': environment.APP_NAME},
         }
     }
 
@@ -125,7 +123,7 @@ else:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-            'LOCATION': f'redis://{environment.CACHE_URI}:{environment.CACHE_URI_PORT}'
+            'LOCATION': f'redis://{environment.CACHE_URI}:{environment.CACHE_URI_PORT}',
         },
     }
 
@@ -187,6 +185,39 @@ else:
         BASE_DIR / "static_extra",
     ]
 
+# Logging Settings
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': [],
+            'class': 'logging.StreamHandler',
+            'formatter': 'custom_formatter',
+        },
+        'stream': {
+            'level': 'ERROR',
+            'filters': [],
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'formatters': {
+        'custom_formatter': {
+            'format': '[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',  # Customize the date format
+        },
+    },
+    'loggers': {
+        'chat.consumers': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'chat.tests': {'handlers': ['console'], 'level': 'DEBUG', 'propagate': False},
+    },
+}
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -197,13 +228,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
-
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 25,
     'DEFAULT_AUTHENTICATION_CLASSES': [
         # 'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-    ]
+    ],
 }
 
 
@@ -221,9 +251,7 @@ CSRF_COOKIE_DOMAIN = environment.COOKIES_ALLOWED_DOMAIN
 # Channels Settings
 if IS_LOCAL:
     CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer"
-        },
+        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
     }
 else:
     CHANNEL_LAYERS = {

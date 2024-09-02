@@ -12,8 +12,5 @@ def formate_chats_to_gpt_request_messages(chats):
     # Format Recent Chat Messages
     gpt_request_messages = []
     for message in chats:
-        gpt_request_messages.append({
-            "role": message.role,
-            "content": message.content
-        })
+        gpt_request_messages.append({"role": message.role, "content": message.content})
     return gpt_request_messages
