@@ -1,0 +1,24 @@
+[project]
+name = "shzgptserver"
+version = "0.1.0"
+description = "SHZ GPT API Server"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "SHZgptServer.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_scheme = "pep440"
+version_provider = "pep621"
+update_changelog_on_bump = true
+
+[tool.pyright]
+include = ["chat", "SHZgptServer"]
+exclude = ["**/node_modules", "**/__pycache__"]
+venv = "/Users/peter/.pyenv/versions/shzgpt"
+pythonVersion = "3.9"
