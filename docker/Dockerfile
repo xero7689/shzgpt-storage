@@ -1,4 +1,4 @@
-FROM python:3.9.10 AS build-image
+FROM python:3.11.9 AS build-image
 
 RUN apt-get --allow-releaseinfo-change update && apt-get install -y git
 
@@ -18,7 +18,7 @@ COPY requirements-dev.txt .
 RUN if [ "$IS_DEBUG" = "True" ] ; then pip install -r requirements-dev.txt -t /python_package ; fi
 
 
-FROM python:3.9.10 AS deploy-image
+FROM python:3.11.9 AS deploy-image
 COPY --from=build-image /python_package /python_package
 
 # Environment for Python
@@ -38,4 +38,3 @@ WORKDIR /workspace
 
 COPY . .
 ENTRYPOINT /bin/bash docker/bin/startup.sh $DJANGO_SUPERUSER_USERNAME $DJANGO_SUPERUSER_PASSWORD $DJANGO_SUPERUSER_EMAIL
-#CMD python manage.py runserver 0.0.0.0:8000
