@@ -31,7 +31,7 @@ class LLMVendor(ABC):
         pass
 
 class OpenAILLM(LLMVendor):
-    def __init__(self, api_key, model="gpt-3.5-turbo"):
+    def __init__(self, api_key, model="gpt-4o-mini"):
         super().__init__(api_key)
         self.client = OpenAI(api_key=api_key)
         self.model = model
