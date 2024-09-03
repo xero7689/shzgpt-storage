@@ -5,23 +5,23 @@ description = "SHZ GPT API Server"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "boto3>=1.35.10",
-    "channels-redis>=4.2.0",
-    "channels[daphne]>=4.1.0",
-    "django-cors-headers>=4.4.0",
-    "django-filter>=24.3",
-    "django>=4.2.15",
-    "djangorestframework>=3.15.2",
-    "martor>=1.6.44",
-    "openai>=1.43.0",
-    "orjson>=3.10.7",
-    "psycopg2>=2.9.9",
-    "pydantic>=2.8.2",
-    "pytz>=2024.1",
-    "redis>=5.0.8",
-    "sqlparse>=0.5.1",
-    "tiktoken>=0.7.0",
-    "uvicorn[standard]>=0.30.6",
+  "boto3>=1.35.10",
+  "channels-redis>=4.2.0",
+  "channels[daphne]>=4.1.0",
+  "django-cors-headers>=4.4.0",
+  "django-filter>=24.3",
+  "django>=4.2.15",
+  "djangorestframework>=3.15.2",
+  "martor>=1.6.44",
+  "openai>=1.43.0",
+  "orjson>=3.10.7",
+  "psycopg2>=2.9.9",
+  "pydantic>=2.8.2",
+  "pytz>=2024.1",
+  "redis>=5.0.8",
+  "sqlparse>=0.5.1",
+  "tiktoken>=0.7.0",
+  "uvicorn[standard]>=0.30.6",
 ]
 
 [tool.pytest.ini_options]
@@ -36,18 +36,18 @@ version_provider = "pep621"
 update_changelog_on_bump = true
 
 [tool.pyright]
-include = ["chat", "SHZgptServer"]
 exclude = ["**/node_modules", "**/__pycache__"]
-venv = "/Users/peter/.pyenv/versions/shzgpt"
+venvPath = "."
+venv = ".venv"
 pythonVersion = "3.11"
 
 [tool.uv]
 dev-dependencies = [
-    "commitizen>=3.29.0",
-    "faker>=28.1.0",
-    "ipdb>=0.13.13",
-    "pytest-django",
-    "pytest-mock",
-    "pytest-xdist",
-    "pytest>=8.3.2",
+  "commitizen>=3.29.0",
+  "faker>=28.1.0",
+  "ipdb>=0.13.13",
+  "pytest-django",
+  "pytest-mock",
+  "pytest-xdist",
+  "pytest>=8.3.2",
 ]
