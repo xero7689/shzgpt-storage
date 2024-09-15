@@ -1,3 +1,5 @@
+import uuid
+
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
@@ -16,6 +18,7 @@ class ChatUser(models.Model):
 
 class AIVendor(models.Model):
     name = models.CharField(max_length=64)
+    vendor_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
 
     def __str__(self):
         return self.name
@@ -24,6 +27,7 @@ class AIVendor(models.Model):
 class AIModel(models.Model):
     name = models.CharField(max_length=128)
     vendor = models.ForeignKey(AIVendor, on_delete=models.CASCADE)
+    model_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
 
     def __str__(self):
         return self.name
