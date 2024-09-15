@@ -103,3 +103,15 @@ def signup(
     return 201, SignUpOut(
         member_id=str(user.member_id), username=user.username, email=user.email
     )
+
+
+@router.get("/whoami/", auth=django_auth, response=LoginOut)
+def get_user(request) -> LoginOut:
+    print(request.user.member_id)
+    print(request.user.username)
+    print(request.user.date_joined)
+    return LoginOut(
+        member_id=str(request.user.member_id),
+        username=request.user.username,
+        created_at=request.user.date_joined,
+    )
