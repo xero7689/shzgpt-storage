@@ -5,7 +5,8 @@ description = "SHZ GPT API Server"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-  "boto3>=1.35.10",
+  "aioboto3>=1.0.0",
+  "boto3==1.34.70",
   "channels-redis>=4.2.0",
   "channels[daphne]>=4.1.0",
   "django-cors-headers>=4.4.0",
@@ -20,6 +21,7 @@ dependencies = [
   "pydantic>=2.8.2",
   "pytz>=2024.1",
   "redis>=5.0.8",
+  "shz-llm-client",
   "sqlparse>=0.5.1",
   "tiktoken>=0.7.0",
   "uvicorn[standard]>=0.30.6",
@@ -54,6 +56,9 @@ dev-dependencies = [
   "pytest>=8.3.2",
   "ruff>=0.6.5",
 ]
+
+[tool.uv.sources]
+shz-llm-client = { git = "https://github.com/xero7689/shz-llm-client.git" }
 
 [tool.ruff]
 exclude = ["asgi.py", "/migrations/", "manage.py"]
