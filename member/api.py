@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django.conf import settings
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import get_user_model, authenticate
 from django.views.decorators.csrf import csrf_exempt
@@ -41,6 +41,12 @@ class SignUpIn(Schema):
     email: str
 
 
+class SignUpOut(Schema):
+    member_id: str
+    username: str
+    email: str
+
+
 @router.post("/login/", response=LoginOut)
 @csrf_exempt
 def login(request, data: LoginIn, response: HttpResponse) -> LoginOut:
@@ -68,7 +74,7 @@ def login(request, data: LoginIn, response: HttpResponse) -> LoginOut:
     )
 
 
-@router.get("/logout/", auth=django_auth)
+@router.post("/logout/", auth=django_auth)
 def logout(request, response: HttpResponse):
     if request.user.is_authenticated:
         response.delete_cookie("sessionid", domain=settings.COOKIES_ALLOWED_DOMAIN)
@@ -78,9 +84,12 @@ def logout(request, response: HttpResponse):
     return {}
 
 
-@router.post("/signup/")
+@router.post("/sign-up/", response={201: SignUpOut})
 @csrf_exempt
-def signup(request, data: SignUpIn):
+def signup(
+    request,
+    data: SignUpIn,
+):
     if User.objects.filter(username=data.username).exists():
         raise SignUpError("Username already exists")
 
@@ -91,6 +100,6 @@ def signup(request, data: SignUpIn):
         username=data.username, email=data.email, password=data.password
     )
 
-    return JsonResponse(
-        {"member_id": user.member_id, "username": user.username, "email": user.email}
+    return 201, SignUpOut(
+        member_id=str(user.member_id), username=user.username, email=user.email
     )
