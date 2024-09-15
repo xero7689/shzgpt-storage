@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from chat.models import Chat, ChatRoom
+from chat.models import Message, ChatRoom
 
 User = get_user_model()
 
@@ -25,14 +25,14 @@ class ChatRoomAPIViewTest(TestCase):
 
     def test_delete_chat(self):
         self.client.force_login(self.user)
-        chat_obj = Chat.objects.create(
+        chat_obj = Message.objects.create(
             role="user", content="Unit Test Chat", tokens=3, chatroom=self.chatroom
         )
         url = reverse("message-detail", kwargs={"pk": chat_obj.pk})
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, 204)
-        self.assertEqual(len(Chat.objects.all()), 0)
+        self.assertEqual(len(Message.objects.all()), 0)
 
     def tearDown(self):
         cache.clear()

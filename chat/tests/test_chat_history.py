@@ -6,8 +6,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from chat.models import Chat, ChatRoom
-from chat.serializers import ChatSerializer
+from chat.models import Message, ChatRoom
+from chat.serializers import MessageSerializer
 
 
 User = get_user_model()
@@ -24,7 +24,7 @@ class ChatHistoryAPIViewTestCase(TestCase):
         )
 
         self.chatroom = ChatRoom.objects.create(name="Test Chat Room", owner=self.user)
-        self.chat = Chat.objects.create(
+        self.chat = Message.objects.create(
             chatroom=self.chatroom,
             role="user",
             content="First test content",
@@ -37,8 +37,8 @@ class ChatHistoryAPIViewTestCase(TestCase):
         url = reverse("chat-history", kwargs={"chatroom_id": self.chatroom.pk})
         self.client.force_login(self.user)
         response = self.client.get(url, format="json")
-        chat_serializer = ChatSerializer(
-            Chat.objects.filter(chatroom=self.chatroom).order_by("-created_at")[:20],
+        chat_serializer = MessageSerializer(
+            Message.objects.filter(chatroom=self.chatroom).order_by("-created_at")[:20],
             many=True,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -58,8 +58,8 @@ class ChatHistoryAPIViewTestCase(TestCase):
             url + date_qs,
             format="json",
         )
-        chat_serializer = ChatSerializer(
-            Chat.objects.filter(
+        chat_serializer = MessageSerializer(
+            Message.objects.filter(
                 chatroom=self.chatroom,
                 created_at__gte=start_date,
                 created_at__lt=end_date,
@@ -78,8 +78,8 @@ class ChatHistoryAPIViewTestCase(TestCase):
         response = self.client.get(
             url + f'?date_gte={start_date.strftime("%Y-%m-%d %H:%M:%S")}', format="json"
         )
-        chat_serializer = ChatSerializer(
-            Chat.objects.filter(
+        chat_serializer = MessageSerializer(
+            Message.objects.filter(
                 chatroom=self.chatroom, created_at__gte=start_date
             ).order_by("-created_at"),
             many=True,
@@ -96,8 +96,8 @@ class ChatHistoryAPIViewTestCase(TestCase):
         response = self.client.get(
             url + f'?date_lt={end_date.strftime("%Y-%m-%d %H:%M:%S")}', format="json"
         )
-        chat_serializer = ChatSerializer(
-            Chat.objects.filter(
+        chat_serializer = MessageSerializer(
+            Message.objects.filter(
                 chatroom=self.chatroom, created_at__lt=end_date
             ).order_by("-created_at"),
             many=True,
