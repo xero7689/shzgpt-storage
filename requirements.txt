@@ -14,8 +14,6 @@ asgiref==3.7.2
     #   daphne
     #   django
     #   django-cors-headers
-async-timeout==4.0.3
-    # via redis
 attrs==23.2.0
     # via
     #   service-identity
@@ -66,16 +64,17 @@ django==4.2.15
     #   channels
     #   django-cors-headers
     #   django-filter
+    #   django-ninja
     #   djangorestframework
     #   martor
 django-cors-headers==4.4.0
     # via shzgptserver (pyproject.toml)
 django-filter==24.3
     # via shzgptserver (pyproject.toml)
+django-ninja==1.3.0
+    # via shzgptserver (pyproject.toml)
 djangorestframework==3.15.2
     # via shzgptserver (pyproject.toml)
-exceptiongroup==1.1.3
-    # via anyio
 h11==0.14.0
     # via
     #   httpcore
@@ -97,8 +96,6 @@ idna==3.3
     #   hyperlink
     #   requests
     #   twisted
-importlib-metadata==7.1.0
-    # via markdown
 incremental==24.7.2
     # via twisted
 jiter==0.5.0
@@ -130,6 +127,7 @@ pycparser==2.22
 pydantic==2.8.2
     # via
     #   shzgptserver (pyproject.toml)
+    #   django-ninja
     #   openai
 pydantic-core==2.20.1
     # via pydantic
@@ -177,8 +175,6 @@ sqlparse==0.5.1
     #   django
 tiktoken==0.7.0
     # via shzgptserver (pyproject.toml)
-tomli==2.0.1
-    # via incremental
 tqdm==4.66.1
     # via openai
 twisted==24.7.0
@@ -187,13 +183,10 @@ txaio==23.1.1
     # via autobahn
 typing-extensions==4.12.2
     # via
-    #   asgiref
-    #   automat
     #   openai
     #   pydantic
     #   pydantic-core
     #   twisted
-    #   uvicorn
 tzdata==2023.3
     # via martor
 urllib3==1.26.8
@@ -210,7 +203,5 @@ webencodings==0.5.1
     # via bleach
 websockets==13.0.1
     # via uvicorn
-zipp==3.19.2
-    # via importlib-metadata
 zope-interface==7.0.1
     # via twisted
