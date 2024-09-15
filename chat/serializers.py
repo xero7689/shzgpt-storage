@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
-from .models import Chat, ChatRoom, Prompt, PromptTopic
+from .models import Message, ChatRoom, Prompt, PromptTopic
 
 
-class ChatSerializer(serializers.ModelSerializer):
+class MessageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Chat
+        model = Message
         fields = ["id", "role", "content", "chatroom", "tokens", "created_at"]
 
 

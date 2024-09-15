@@ -6,7 +6,7 @@ from channels.auth import login
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-from chat.models import Chat, ChatRoom
+from chat.models import Message, ChatRoom
 from bot.models import APIKey
 from chat.schema import ChatContext, ChatRequest, ChatResponse, ChatRole, ChatStatus
 from common.tokenizer import num_tokens_from_message
@@ -71,9 +71,7 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
             response = client.send(messages, system_prompt)
 
             # Save GPT Content to Database
-            await self.save_gpt_response_message(
-                request, response, 0
-            )
+            await self.save_gpt_response_message(request, response, 0)
 
             response = self.build_gpt_message_response(request, response)
         except Exception as error:
@@ -111,7 +109,7 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
     def get_recent_chat_messages(self, request, cal_num=10):
         chatroom_id = request.context.chatroom_id
         recent_messages = (
-            Chat.objects.filter(chatroom=chatroom_id)
+            Message.objects.filter(chatroom=chatroom_id)
             .order_by("-created_at")
             .values()[:cal_num]
         )
@@ -134,7 +132,7 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
             "content": request.context.content,
         }
         tokens = num_tokens_from_message(request_message)
-        request_chat_message = Chat(
+        request_chat_message = Message(
             role="user",
             content=request.context.content,
             chatroom=chatroom,
@@ -145,7 +143,7 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def save_gpt_response_message(self, request, content: str, tokens: int) -> None:
         chatroom = ChatRoom.objects.get(id=request.context.chatroom_id)
-        gpt_response_message = Chat(
+        gpt_response_message = Message(
             role="assistant", content=content, chatroom=chatroom, tokens=tokens
         )
         gpt_response_message.save()

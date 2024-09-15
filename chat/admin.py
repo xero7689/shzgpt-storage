@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db.models import Count
 
 from .models import (
-    Chat,
+    Message,
     ChatRoom,
     Prompt,
     PromptTopic,
@@ -35,7 +35,7 @@ class ChatRoomAdmin(admin.ModelAdmin):
     chat_count.short_description = "Chats"
 
 
-@admin.register(Chat)
+@admin.register(Message)
 class ChatAdmin(admin.ModelAdmin):
     list_display = ["id", "created_at", "chatroom", "role", "tokens", "content"]
 

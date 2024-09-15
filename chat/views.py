@@ -11,14 +11,14 @@ from rest_framework.response import Response
 from rest_framework.serializers import ReturnDict
 from rest_framework.views import APIView
 
-from .models import Chat, ChatRoom, Prompt, PromptTopic
+from .models import Message, ChatRoom, Prompt, PromptTopic
 from bot.serializers import APIKeySerializer
 from bot.models import APIKey
 
 from member.serializers import MemberSerializer
 from .serializers import (
     ChatRoomSerializer,
-    ChatSerializer,
+    MessageSerializer,
     PromptSerializer,
     PromptTopicSerializer,
 )
@@ -161,18 +161,18 @@ class ChatRoomAPIView(generics.ListCreateAPIView):
         cache.set(queryset_cache_key, queryset, 60 * 60)
 
 
-class ChatsAPIView(generics.ListCreateAPIView):
+class MessagesAPIView(generics.ListCreateAPIView):
     authentication_classes = [authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Chat.objects.all().order_by("-created_at")
-    serializer_class = ChatSerializer
+    queryset = Message.objects.all().order_by("-created_at")
+    serializer_class = MessageSerializer
 
 
-class ChatAPIView(generics.RetrieveUpdateDestroyAPIView):
+class MessageAPIView(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = [authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = ChatSerializer
-    queryset = Chat.objects.all()
+    serializer_class = MessageSerializer
+    queryset = Message.objects.all()
 
 
 class ChatHistoryAPIView(APIView):
@@ -230,7 +230,7 @@ class ChatHistoryAPIView(APIView):
         date_lt_str = request.GET.get("date_lt")
 
         # Set default start and end dates if not provided
-        chats = Chat.objects.filter(chatroom=chatroom).order_by("created_at")
+        chats = Message.objects.filter(chatroom=chatroom).order_by("created_at")
         if not chats.exists():
             return Response(
                 {
@@ -260,7 +260,7 @@ class ChatHistoryAPIView(APIView):
             end_date += timezone.timedelta(seconds=1)
 
         # Fetch chats based on start and end dates
-        chats = Chat.objects.filter(
+        chats = Message.objects.filter(
             chatroom=chatroom, created_at__gte=start_date, created_at__lt=end_date
         ).order_by("-created_at")
 
@@ -268,7 +268,7 @@ class ChatHistoryAPIView(APIView):
         if not date_gte_str and not date_lt_str:
             chats = chats[: self.DEFAULT_CHAT_LIMIT]
 
-        serializer = ChatSerializer(chats, many=True)
+        serializer = MessageSerializer(chats, many=True)
         return Response(serializer.data)
 
 

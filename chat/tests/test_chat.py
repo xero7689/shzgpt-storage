@@ -28,7 +28,7 @@ class ChatRoomAPIViewTest(TestCase):
         chat_obj = Chat.objects.create(
             role="user", content="Unit Test Chat", tokens=3, chatroom=self.chatroom
         )
-        url = reverse("chat-detail", kwargs={"pk": chat_obj.pk})
+        url = reverse("message-detail", kwargs={"pk": chat_obj.pk})
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, 204)

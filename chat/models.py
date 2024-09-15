@@ -18,7 +18,7 @@ class ChatRoom(models.Model):
         return self.name
 
 
-class Chat(models.Model):
+class Message(models.Model):
     role = models.CharField(max_length=32)
 
     content = models.TextField()
@@ -37,7 +37,7 @@ class Chat(models.Model):
         self.chatroom.save()
 
         # Call the original save() method to save the Chat object
-        super(Chat, self).save(*args, **kwargs)
+        super(Message, self).save(*args, **kwargs)
 
 
 class PromptTopic(models.Model):
