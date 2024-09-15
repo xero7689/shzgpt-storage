@@ -9,8 +9,9 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from chat.models import Chat, ChatRoom
 from bot.models import APIKey
 from chat.schema import ChatContext, ChatRequest, ChatResponse, ChatRole, ChatStatus
-from common.llm_vendor import OpenAILLM
 from common.tokenizer import num_tokens_from_message
+
+from shz_llm_client import OpenAIClient, RequestMessage
 
 logger = logging.getLogger(__name__)
 
@@ -51,21 +52,30 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
             },
         )
 
-        # Query OpenAI AP
+        # Query OpenAI API
         api_key = await self.get_api_key()
         recent_chat_messages = await self.get_recent_chat_messages(request)
 
-        llm = OpenAILLM(api_key, model="gpt-4o-mini")
+        client = OpenAIClient(api_key, model_id="gpt-4o-mini", stream=False)
+        system_prompt = RequestMessage(
+            role="system", content="You are a helpful assistant."
+        )
+
+        messages = []
+        for message in recent_chat_messages[::-1]:
+            messages.append(
+                RequestMessage(role=message["role"], content=message["content"])
+            )
 
         try:
-            llm.send(recent_chat_messages[::-1])
+            response = client.send(messages, system_prompt)
 
             # Save GPT Content to Database
             await self.save_gpt_response_message(
-                request, llm.response_content, llm.response_tokens
+                request, response, 0
             )
 
-            response = self.build_gpt_message_response(request, llm.response_content)
+            response = self.build_gpt_message_response(request, response)
         except Exception as error:
             # Handling OpenAIs 500 Internal Server Error
             response = self.build_gpt_message_response(request, str(error))
