@@ -46,6 +46,7 @@ dev-dependencies = [
   "commitizen>=3.29.0",
   "faker>=28.1.0",
   "ipdb>=0.13.13",
+  "ipython>=8.18.0",
   "pytest-django",
   "pytest-mock",
   "pytest-xdist",
