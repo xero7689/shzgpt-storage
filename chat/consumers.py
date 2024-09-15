@@ -6,7 +6,8 @@ from channels.auth import login
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-from chat.models import APIKey, Chat, ChatRoom
+from chat.models import Chat, ChatRoom
+from bot.models import APIKey
 from chat.schema import ChatContext, ChatRequest, ChatResponse, ChatRole, ChatStatus
 from common.llm_vendor import OpenAILLM
 from common.tokenizer import num_tokens_from_message

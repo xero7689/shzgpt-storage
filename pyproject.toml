@@ -51,4 +51,8 @@ dev-dependencies = [
   "pytest-mock",
   "pytest-xdist",
   "pytest>=8.3.2",
+  "ruff>=0.6.5",
 ]
+
+[tool.ruff]
+exclude = ["asgi.py", "/migrations/", "manage.py"]

@@ -1,5 +1,3 @@
-from abc import ABC, abstractclassmethod
-
 from common.llm_vendor import OpenAI
 
 
@@ -9,7 +7,4 @@ class OpenAILLM:
 
 
 def llm_factory(vendor):
-    if vendor == "openai":
-        llm = OpenAILLM
-    else:
-        raise NotImplementedError("Unimplement LLM vendor")
+    raise NotImplementedError("Unimplement LLM vendor")

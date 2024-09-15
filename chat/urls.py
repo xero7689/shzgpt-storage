@@ -1,5 +1,3 @@
-from django.conf import settings
-from django.conf.urls.static import static
 from django.urls import include, path
 
 from .views import (
@@ -37,4 +35,4 @@ urlpatterns = [
     path("logout/", CustomLogOutView.as_view(), name="logout"),
     path("signup/", CustomSignUpView.as_view(), name="signup"),
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+]

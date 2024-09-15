@@ -30,6 +30,7 @@ class LLMVendor(ABC):
     def _process_response(self):
         pass
 
+
 class OpenAILLM(LLMVendor):
     def __init__(self, api_key, model="gpt-4o-mini"):
         super().__init__(api_key)
@@ -49,15 +50,15 @@ class OpenAILLM(LLMVendor):
 
     @property
     def response_content(self) -> str:
-        choices = getattr(self.response, 'choices', [])
-        message = getattr(choices[0], 'message', {})
-        content = getattr(message, 'content', 'Empty chat response')
+        choices = getattr(self.response, "choices", [])
+        message = getattr(choices[0], "message", {})
+        content = getattr(message, "content", "Empty chat response")
         return content
 
     @property
     def response_tokens(self) -> int:
-        usage = getattr(self.response, 'usage', {})
-        completion_tokens = getattr(usage, 'completion_tokens', 0)
+        usage = getattr(self.response, "usage", {})
+        completion_tokens = getattr(usage, "completion_tokens", 0)
         return completion_tokens
 
     def _preprocess_messages(self, messages):

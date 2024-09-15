@@ -32,10 +32,8 @@ class OpenAIAPIWrapper(BaseChatCompleteWrapper):
         return messages
 
     def _make_api_request(self, messages):
-        return self.vendor.ChatCompletion.create(
-            model="gpt-4o-mini", messages=messages
-        )
+        return self.vendor.ChatCompletion.create(model="gpt-4o-mini", messages=messages)
 
     def _process_response(self, response):
-        response = response['choices'][0]['message']['content']
+        response = response["choices"][0]["message"]["content"]
         return response

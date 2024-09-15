@@ -5,19 +5,20 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, get_user_model
 from django.core.cache import cache
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import authentication, generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.serializers import ReturnDict
 from rest_framework.views import APIView
 
-from .models import APIKey, Chat, ChatRoom, ChatUser, Prompt, PromptTopic
-from .serializer import (
-    APIKeySerializer,
+from .models import Chat, ChatRoom, Prompt, PromptTopic
+from bot.serializers import APIKeySerializer
+from bot.models import APIKey
+
+from member.serializers import MemberSerializer
+from .serializers import (
     ChatRoomSerializer,
     ChatSerializer,
-    ChatUserSerializer,
     PromptSerializer,
     PromptTopicSerializer,
 )
@@ -35,7 +36,7 @@ class CustomLogInView(APIView):
 
         if not username or not password:
             content = build_response_content(
-                data=ReturnDict(serializer=ChatUserSerializer),
+                data=ReturnDict(serializer=MemberSerializer),
                 status="failed",
                 detail="Username/Password is required",
             )
@@ -51,19 +52,17 @@ class CustomLogInView(APIView):
             # We should Make ChatUser directly as The AbstractUser
             # Then we dont need to query the ChatUser again
             # after authenticate the user
-            chatUser = get_object_or_404(ChatUser, user=user)
-
-            serializer = ChatUserSerializer(chatUser)
+            serializer = MemberSerializer(user)
             content = build_response_content(
                 data=serializer.data, status="succeeded", detail=""
             )
 
             response = JsonResponse(content, safe=False)
             response.set_cookie(
-                "c_user", chatUser.id, domain=settings.COOKIES_ALLOWED_DOMAIN
+                "c_user", user.id, domain=settings.COOKIES_ALLOWED_DOMAIN
             )
 
-            api_key = APIKey.objects.filter(owner__user=user).first()
+            api_key = APIKey.objects.filter(owner=user).first()
             if api_key:
                 masked_key = mask_api_key(api_key.key)
                 response.set_cookie(
@@ -73,7 +72,7 @@ class CustomLogInView(APIView):
             return response
         else:
             content = build_response_content(
-                data=ReturnDict(serializer=ChatUserSerializer),
+                data=ReturnDict(serializer=MemberSerializer),
                 status="failed",
                 detail="Username/Password Invalid",
             )
@@ -106,7 +105,7 @@ class CustomSignUpView(APIView):
 
         if not username or not password or not email:
             content = build_response_content(
-                data=ReturnDict(serializer=ChatUserSerializer),
+                data=ReturnDict(serializer=MemberSerializer),
                 status="failed",
                 detail="Username/Password/Email is required",
             )
@@ -115,8 +114,6 @@ class CustomSignUpView(APIView):
         user = User.objects.create_user(
             username=username, password=password, email=email
         )
-
-        ChatUser.objects.create(user=user)
 
         if user is not None:
             login(request, user)
@@ -133,8 +130,7 @@ class ChatUserAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        chat_user = ChatUser.objects.get(user=request.user.id)
-        serializer = ChatUserSerializer(chat_user)
+        serializer = MemberSerializer(request.user)
         return Response(serializer.data)
 
 
@@ -151,17 +147,17 @@ class ChatRoomAPIView(generics.ListCreateAPIView):
         if cached_queryset is not None:
             queryset = cached_queryset
         else:
-            queryset = ChatRoom.objects.filter(owner__user=user).order_by("created_at")
+            queryset = ChatRoom.objects.filter(owner=user).order_by("created_at")
             cache.set(queryset_cache_key, queryset, 60 * 60)
 
         return queryset
 
     def perform_create(self, serializer):
-        serializer.save(owner=ChatUser.objects.get(user=self.request.user))
+        serializer.save(owner=self.request.user)
 
         user = self.request.user
         queryset_cache_key = f"views.queryset.cache.chatroomapi.{user}"
-        queryset = ChatRoom.objects.filter(owner__user=user).order_by("created_at")
+        queryset = ChatRoom.objects.filter(owner=user).order_by("created_at")
         cache.set(queryset_cache_key, queryset, 60 * 60)
 
 
@@ -219,7 +215,7 @@ class ChatHistoryAPIView(APIView):
 
         user = request.user
 
-        chatroom = ChatRoom.objects.filter(owner__user=user, id=chatroom_id).first()
+        chatroom = ChatRoom.objects.filter(owner=user, id=chatroom_id).first()
         if not chatroom:
             return Response(
                 {
@@ -299,7 +295,7 @@ class APIKeyView(APIView):
 
     def get(self, request, *args, **kwargs):
         user = self.request.user
-        api_keys = APIKey.objects.filter(owner__user=user).order_by("created_at")
+        api_keys = APIKey.objects.filter(owner=user).order_by("created_at")
         masked_api_keys = []
 
         for api_key in api_keys:
@@ -315,8 +311,7 @@ class APIKeyView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        owner = ChatUser.objects.get(user=self.request.user)
-        api_key = serializer.save(owner=owner)
+        api_key = serializer.save(owner=self.request.user)
         return Response(
             self.serializer_class(api_key).data, status=status.HTTP_201_CREATED
         )

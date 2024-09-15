@@ -43,49 +43,51 @@ DJANGO_ADMIN_URL_PATH = environment.DJANGO_ADMIN_URL_PATH
 
 # Application definition
 INSTALLED_APPS = [
-    'daphne',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'corsheaders',
-    'rest_framework',
-    'chat',
+    "daphne",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "corsheaders",
+    "rest_framework",
+    "member",
+    "bot",
+    "chat",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'SHZgptServer.urls'
+ROOT_URLCONF = "SHZgptServer.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'SHZgptServer.wsgi.application'
-ASGI_APPLICATION = 'SHZgptServer.asgi.application'
+WSGI_APPLICATION = "SHZgptServer.wsgi.application"
+ASGI_APPLICATION = "SHZgptServer.asgi.application"
 
 
 # Database
@@ -93,37 +95,37 @@ ASGI_APPLICATION = 'SHZgptServer.asgi.application'
 
 if IS_LOCAL:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 else:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': environment.DATABASE_DB_NAME,
-            'USER': environment.DATABASE_USER,
-            'PASSWORD': environment.DATABASE_PASSWD,
-            'HOST': environment.DATABASE_URI,
-            'PORT': environment.DATABASE_URI_PORT,
-            'OPTIONS': {'application_name': environment.APP_NAME},
+        "default": {
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": environment.DATABASE_DB_NAME,
+            "USER": environment.DATABASE_USER,
+            "PASSWORD": environment.DATABASE_PASSWD,
+            "HOST": environment.DATABASE_URI,
+            "PORT": environment.DATABASE_URI_PORT,
+            "OPTIONS": {"application_name": environment.APP_NAME},
         }
     }
 
 # Cache
 if IS_LOCAL:
     CACHES = {
-        'default': {
+        "default": {
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
             "LOCATION": "unique-snowflake",
         },
     }
 else:
     CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-            'LOCATION': f'redis://{environment.CACHE_URI}:{environment.CACHE_URI_PORT}',
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": f"redis://{environment.CACHE_URI}:{environment.CACHE_URI_PORT}",
         },
     }
 
@@ -133,16 +135,16 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -150,9 +152,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'Asia/Taipei'
+TIME_ZONE = "Asia/Taipei"
 
 USE_I18N = True
 
@@ -162,8 +164,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-MEDIA_URL = 'media/'
+STATIC_URL = "static/"
+MEDIA_URL = "media/"
 if USE_S3:
     AWS_S3_REGION = environment.AWS_S3_REGION
     AWS_ACCESS_KEY_ID = environment.AWS_ACCESS_KEY_ID
@@ -173,66 +175,69 @@ if USE_S3:
     AWS_S3_OBJECT_PARAMETERS = environment.AWS_S3_OBJECT_PARAMETERS
     AWS_LOCATION = environment.AWS_LOCATION
 
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 else:
     if IN_CONTAINER:
-        STATIC_ROOT = os.path.join(CONTAINER_STORAGE_PATH, 'static')
-        MEDIA_ROOT = os.path.join(CONTAINER_STORAGE_PATH, 'media')
+        STATIC_ROOT = os.path.join(CONTAINER_STORAGE_PATH, "static")
+        MEDIA_ROOT = os.path.join(CONTAINER_STORAGE_PATH, "media")
     else:
-        STATIC_ROOT = os.path.join(BASE_DIR, 'static_root/')
-        MEDIA_ROOT = os.path.join(BASE_DIR, 'media_root')
+        STATIC_ROOT = os.path.join(BASE_DIR, "static_root/")
+        MEDIA_ROOT = os.path.join(BASE_DIR, "media_root")
     STATICFILES_DIRS = [
         BASE_DIR / "static_extra",
     ]
 
 # Logging Settings
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'filters': [],
-            'class': 'logging.StreamHandler',
-            'formatter': 'custom_formatter',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "filters": [],
+            "class": "logging.StreamHandler",
+            "formatter": "custom_formatter",
         },
-        'stream': {
-            'level': 'ERROR',
-            'filters': [],
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'formatters': {
-        'custom_formatter': {
-            'format': '[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S',  # Customize the date format
+        "stream": {
+            "level": "ERROR",
+            "filters": [],
+            "class": "logging.StreamHandler",
         },
     },
-    'loggers': {
-        'chat.consumers': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
+    "formatters": {
+        "custom_formatter": {
+            "format": "[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",  # Customize the date format
         },
-        'chat.tests': {'handlers': ['console'], 'level': 'DEBUG', 'propagate': False},
+    },
+    "loggers": {
+        "chat.consumers": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "chat.tests": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
     },
 }
+
+# User Model
+AUTH_USER_MODEL = "member.Member"
 
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 #
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 25,
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 25,
+    "DEFAULT_AUTHENTICATION_CLASSES": [
         # 'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        "rest_framework.authentication.SessionAuthentication",
     ],
 }
 
