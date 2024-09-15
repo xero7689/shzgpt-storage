@@ -3,13 +3,15 @@ from datetime import datetime
 
 import orjson
 from channels.testing import WebsocketCommunicator
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from chat.consumers import AsyncChatConsumer
-from chat.models import ChatRoom, ChatUser
+from chat.models import ChatRoom
 from chat.schema import ChatContext, ChatRequest, ChatResponse, ChatRole
+
+User = get_user_model()
 
 
 class SocketServerTests(TestCase):
@@ -20,10 +22,9 @@ class SocketServerTests(TestCase):
         self.user = User.objects.create_user(
             username=self.username, password=self.password
         )
-        self.chat_user = ChatUser.objects.create(user=self.user, name="test-chat-user")
 
         self.chatroom = ChatRoom.objects.create(
-            name="Test Chat Room 1", owner=self.chat_user
+            name="Test Chat Room 1", owner=self.user
         )
 
         self.client = Client()
@@ -61,7 +62,7 @@ class SocketServerTests(TestCase):
         chat_request = ChatRequest(context=context, timestamp=timestamp)
 
         await communicator.send_json_to(chat_request.model_dump())
-        response = await communicator.receive_from()
+        response = await communicator.receive_from(timeout=30)
 
         response = ChatResponse.model_validate(orjson.loads(response))
 

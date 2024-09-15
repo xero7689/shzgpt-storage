@@ -1,13 +1,16 @@
 from datetime import datetime, timezone
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from chat.models import Chat, ChatRoom, ChatUser
-from chat.serializer import ChatSerializer
+from chat.models import Chat, ChatRoom
+from chat.serializers import ChatSerializer
+
+
+User = get_user_model()
 
 
 class ChatHistoryAPIViewTestCase(TestCase):
@@ -20,10 +23,7 @@ class ChatHistoryAPIViewTestCase(TestCase):
             username=self.username, password=self.password
         )
 
-        self.chat_user = ChatUser.objects.create(user=self.user, name="test-chat-user")
-        self.chatroom = ChatRoom.objects.create(
-            name="Test Chat Room", owner=self.chat_user
-        )
+        self.chatroom = ChatRoom.objects.create(name="Test Chat Room", owner=self.user)
         self.chat = Chat.objects.create(
             chatroom=self.chatroom,
             role="user",

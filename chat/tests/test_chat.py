@@ -1,10 +1,12 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from chat.models import Chat, ChatRoom, ChatUser
+from chat.models import Chat, ChatRoom
+
+User = get_user_model()
 
 
 class ChatRoomAPIViewTest(TestCase):
@@ -17,10 +19,8 @@ class ChatRoomAPIViewTest(TestCase):
             username=self.username, password=self.password
         )
 
-        self.chat_user = ChatUser.objects.create(user=self.user, name=self.username)
-
         self.chatroom = ChatRoom.objects.create(
-            name="Test Chat Room 1", owner=self.chat_user
+            name="Test Chat Room 1", owner=self.user
         )
 
     def test_delete_chat(self):

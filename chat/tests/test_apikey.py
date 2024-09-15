@@ -1,10 +1,15 @@
-from django.contrib.auth.models import User
+import logging
+
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from chat.models import AIModel, AIVendor, APIKey, ChatRoom, ChatUser
+from bot.models import AIModel, AIVendor, APIKey
+from chat.models import ChatRoom
 from chat.utils import mask_api_key
+
+User = get_user_model()
 
 
 class APIKeyViewTest(TestCase):
@@ -17,10 +22,8 @@ class APIKeyViewTest(TestCase):
             username=self.username, password=self.password
         )
 
-        self.chat_user = ChatUser.objects.create(user=self.user, name=self.username)
-
         self.chatroom = ChatRoom.objects.create(
-            name="Test Chat Room 1", owner=self.chat_user
+            name="Test Chat Room 1", owner=self.user
         )
 
         self.ai_vendor = AIVendor.objects.create(name="Test AI Vendor")
@@ -29,7 +32,7 @@ class APIKeyViewTest(TestCase):
         )
 
         self.api_key = APIKey.objects.create(
-            owner=self.chat_user,
+            owner=self.user,
             key="sx-CJdBhagPQ5UTXRJsXmdOT4BlbkFJKAEyBi1FzHRSlWNJnPJD",
             desc="Test API Key",
             model=self.ai_model,
