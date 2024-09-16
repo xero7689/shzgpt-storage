@@ -75,6 +75,7 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
 
             response = self.build_gpt_message_response(request, response)
         except Exception as error:
+            logger.error(f"Query LLM Error: {error}")
             # Handling OpenAIs 500 Internal Server Error
             response = self.build_gpt_message_response(request, str(error))
 
