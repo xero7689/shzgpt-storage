@@ -1,10 +1,20 @@
 from django.contrib import admin
 
 from .models import (
+    Modality,
     AIModel,
     AIVendor,
     APIKey,
 )
+
+
+@admin.register(Modality)
+class ModalityAdminPage(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "input_type",
+        "output_type",
+    )
 
 
 @admin.register(AIVendor)
