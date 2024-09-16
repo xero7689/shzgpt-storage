@@ -6,10 +6,12 @@ from channels.auth import login
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-from chat.models import APIKey, Chat, ChatRoom
+from chat.models import Message, ChatRoom
+from bot.models import APIKey
 from chat.schema import ChatContext, ChatRequest, ChatResponse, ChatRole, ChatStatus
-from common.llm_vendor import OpenAILLM
 from common.tokenizer import num_tokens_from_message
+
+from shz_llm_client import OpenAIClient, RequestMessage
 
 logger = logging.getLogger(__name__)
 
@@ -50,21 +52,28 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
             },
         )
 
-        # Query OpenAI AP
+        # Query OpenAI API
         api_key = await self.get_api_key()
         recent_chat_messages = await self.get_recent_chat_messages(request)
 
-        llm = OpenAILLM(api_key, model="gpt-4o-mini")
+        client = OpenAIClient(api_key, model_id="gpt-4o-mini", stream=False)
+        system_prompt = RequestMessage(
+            role="system", content="You are a helpful assistant."
+        )
 
-        try:
-            llm.send(recent_chat_messages[::-1])
-
-            # Save GPT Content to Database
-            await self.save_gpt_response_message(
-                request, llm.response_content, llm.response_tokens
+        messages = []
+        for message in recent_chat_messages[::-1]:
+            messages.append(
+                RequestMessage(role=message["role"], content=message["content"])
             )
 
-            response = self.build_gpt_message_response(request, llm.response_content)
+        try:
+            response = client.send(messages, system_prompt)
+
+            # Save GPT Content to Database
+            await self.save_gpt_response_message(request, response, 0)
+
+            response = self.build_gpt_message_response(request, response)
         except Exception as error:
             # Handling OpenAIs 500 Internal Server Error
             response = self.build_gpt_message_response(request, str(error))
@@ -100,7 +109,7 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
     def get_recent_chat_messages(self, request, cal_num=10):
         chatroom_id = request.context.chatroom_id
         recent_messages = (
-            Chat.objects.filter(chatroom=chatroom_id)
+            Message.objects.filter(chatroom=chatroom_id)
             .order_by("-created_at")
             .values()[:cal_num]
         )
@@ -123,7 +132,7 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
             "content": request.context.content,
         }
         tokens = num_tokens_from_message(request_message)
-        request_chat_message = Chat(
+        request_chat_message = Message(
             role="user",
             content=request.context.content,
             chatroom=chatroom,
@@ -134,7 +143,7 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def save_gpt_response_message(self, request, content: str, tokens: int) -> None:
         chatroom = ChatRoom.objects.get(id=request.context.chatroom_id)
-        gpt_response_message = Chat(
+        gpt_response_message = Message(
             role="assistant", content=content, chatroom=chatroom, tokens=tokens
         )
         gpt_response_message.save()

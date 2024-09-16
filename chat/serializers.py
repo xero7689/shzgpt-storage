@@ -1,17 +1,11 @@
 from rest_framework import serializers
 
-from .models import APIKey, Chat, ChatRoom, ChatUser, Prompt, PromptTopic
+from .models import Message, ChatRoom, Prompt, PromptTopic
 
 
-class ChatUserSerializer(serializers.ModelSerializer):
+class MessageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ChatUser
-        fields = ["id", "name", "created_at"]
-
-
-class ChatSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Chat
+        model = Message
         fields = ["id", "role", "content", "chatroom", "tokens", "created_at"]
 
 
@@ -31,9 +25,3 @@ class PromptSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prompt
         fields = ["id", "prompt_topic", "name", "content"]
-
-
-class APIKeySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = APIKey
-        fields = ["id", "key", "desc", "model", "created_at"]

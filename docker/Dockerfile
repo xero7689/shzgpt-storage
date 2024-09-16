@@ -1,6 +1,6 @@
-FROM python:3.11.9 AS build-image
+FROM python:3.11.10-slim AS build-image
 
-RUN apt-get --allow-releaseinfo-change update && apt-get install -y git
+RUN apt-get --allow-releaseinfo-change update && apt-get install -y git libpq-dev gcc
 
 RUN apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
@@ -18,8 +18,11 @@ COPY requirements-dev.txt .
 RUN if [ "$IS_DEBUG" = "True" ] ; then pip install -r requirements-dev.txt -t /python_package ; fi
 
 
-FROM python:3.11.9 AS deploy-image
+FROM python:3.11.10-slim AS deploy-image
 COPY --from=build-image /python_package /python_package
+
+# Install necessary PostgreSQL library
+RUN apt-get --allow-releaseinfo-change update && apt-get install -y libpq-dev
 
 # Environment for Python
 ENV PATH=/python_package/bin:$PATH

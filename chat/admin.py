@@ -2,47 +2,14 @@ from django.contrib import admin
 from django.db.models import Count
 
 from .models import (
-    AIModel,
-    AIVendor,
-    APIKey,
-    Chat,
+    Message,
     ChatRoom,
-    ChatUser,
     Prompt,
     PromptTopic,
 )
 
+
 # Register your models here.
-
-
-@admin.register(ChatUser)
-class ChatUserAdmin(admin.ModelAdmin):
-    list_display = [
-        "id",
-        "name",
-        "created_at",
-    ]
-
-
-@admin.register(AIVendor)
-class AIVendor(admin.ModelAdmin):
-    list_display = ["id", "name"]
-
-
-@admin.register(AIModel)
-class AIModel(admin.ModelAdmin):
-    list_display = [
-        "id",
-        "name",
-        "vendor",
-    ]
-
-
-@admin.register(APIKey)
-class APIKey(admin.ModelAdmin):
-    list_display = ["id", "owner", "model", "desc", "created_at"]
-
-
 @admin.register(ChatRoom)
 class ChatRoomAdmin(admin.ModelAdmin):
     list_display = [
@@ -68,7 +35,7 @@ class ChatRoomAdmin(admin.ModelAdmin):
     chat_count.short_description = "Chats"
 
 
-@admin.register(Chat)
+@admin.register(Message)
 class ChatAdmin(admin.ModelAdmin):
     list_display = ["id", "created_at", "chatroom", "role", "tokens", "content"]
 

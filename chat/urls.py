@@ -1,13 +1,11 @@
-from django.conf import settings
-from django.conf.urls.static import static
 from django.urls import include, path
 
 from .views import (
     APIKeyView,
-    ChatAPIView,
+    MessagesAPIView,
     ChatHistoryAPIView,
     ChatRoomAPIView,
-    ChatsAPIView,
+    MessageAPIView,
     ChatSocketInitView,
     ChatUserAPIView,
     CustomLogInView,
@@ -23,8 +21,8 @@ urlpatterns = [
     path("user/", ChatUserAPIView.as_view()),
     path("api-key/", APIKeyView.as_view(), name="api-key"),
     path("chatroom/", ChatRoomAPIView.as_view(), name="chatrooms"),
-    path("chats/", ChatsAPIView.as_view(), name="chat-list"),
-    path("chat/<int:pk>/", ChatAPIView.as_view(), name="chat-detail"),
+    path("messages/", MessagesAPIView.as_view(), name="message-list"),
+    path("message/<int:pk>/", MessageAPIView.as_view(), name="message-detail"),
     path(
         "chat-history/<int:chatroom_id>/",
         ChatHistoryAPIView.as_view(),
@@ -37,4 +35,4 @@ urlpatterns = [
     path("logout/", CustomLogOutView.as_view(), name="logout"),
     path("signup/", CustomSignUpView.as_view(), name="signup"),
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+]
