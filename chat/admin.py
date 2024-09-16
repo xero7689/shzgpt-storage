@@ -25,7 +25,7 @@ class ChatRoomAdmin(admin.ModelAdmin):
     # Annotate Chat Count to it
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        queryset = queryset.annotate(chat_count=Count("chat"))
+        queryset = queryset.annotate(chat_count=Count("message"))
         return queryset
 
     def chat_count(self, obj):

@@ -188,6 +188,10 @@ else:
     ]
 
 # Logging Settings
+LOGGING_STORAGE_PATH = os.environ.get(
+    "API_LOGGING_STORAGE_PATH", "/tmp/shz-gpt-storage.log"
+)
+DEFAULT_LOGGING_LEVEL = "DEBUG" if DEBUG else "INFO"
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -198,6 +202,14 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "custom_formatter",
         },
+        "storage": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOGGING_STORAGE_PATH,
+            "formatter": "verbose",
+            "maxBytes": 1024 * 1024 * 5,
+            "backupCount": 5,
+            "encoding": "utf-8",
+        },
         "stream": {
             "level": "ERROR",
             "filters": [],
@@ -205,6 +217,10 @@ LOGGING = {
         },
     },
     "formatters": {
+        "verbose": {
+            "format": "{levelname}:\t[{asctime}][{module}] - {message}",
+            "style": "{",
+        },
         "custom_formatter": {
             "format": "[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",  # Customize the date format
@@ -213,7 +229,7 @@ LOGGING = {
     "loggers": {
         "chat.consumers": {
             "handlers": ["console"],
-            "level": "DEBUG",
+            "level": DEFAULT_LOGGING_LEVEL,
             "propagate": False,
         },
         "chat.tests": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
