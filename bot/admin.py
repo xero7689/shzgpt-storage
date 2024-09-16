@@ -5,6 +5,7 @@ from .models import (
     AIModel,
     AIVendor,
     APIKey,
+    Bot,
 )
 
 
@@ -34,3 +35,16 @@ class AIModel(admin.ModelAdmin):
 @admin.register(APIKey)
 class APIKey(admin.ModelAdmin):
     list_display = ["id", "owner", "vendor", "desc", "created_at"]
+
+
+@admin.register(Bot)
+class Bot(admin.ModelAdmin):
+    list_display = [
+        "id",
+        "name",
+        "description",
+        "ai_model",
+        "temperature",
+        "created_at",
+        "updated_at",
+    ]

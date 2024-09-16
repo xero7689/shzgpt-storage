@@ -67,3 +67,36 @@ class APIKey(models.Model):
 
     def __str__(self):
         return self.key
+
+
+class Bot(models.Model):
+    # Main fields
+    bot_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    ai_model = models.ForeignKey(
+        "bot.AIModel",
+        on_delete=models.CASCADE,
+        related_name="bots",
+        related_query_name="bot",
+    )
+
+    # Bot's Model Configuration
+    temperature = models.FloatField(default=0.2)
+
+    # Bot's Meta Configuration
+    instruction = models.TextField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"{self.name}"
+
+    def support_modality(
+        self, input_type: Modality.ModalityType, output_type: Modality.ModalityType
+    ) -> bool:
+        return self.ai_model.modalities.filter(
+            input_type=input_type, output_type=output_type
+        ).exists()
