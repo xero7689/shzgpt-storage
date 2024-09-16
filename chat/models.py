@@ -1,8 +1,10 @@
+import uuid
 from django.db import models
 from django.utils import timezone
 
 
 class ChatRoom(models.Model):
+    chatroom_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     owner = models.ForeignKey("member.Member", on_delete=models.PROTECT)
     name = models.CharField(unique=True, max_length=128)
 
@@ -19,6 +21,8 @@ class ChatRoom(models.Model):
 
 
 class Message(models.Model):
+    message_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+
     role = models.CharField(max_length=32)
 
     content = models.TextField()
@@ -41,6 +45,8 @@ class Message(models.Model):
 
 
 class PromptTopic(models.Model):
+    prompt_topic_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+
     owner = models.ForeignKey("member.Member", on_delete=models.PROTECT)
 
     name = models.CharField(unique=True, max_length=128)
@@ -54,6 +60,8 @@ class PromptTopic(models.Model):
 
 
 class Prompt(models.Model):
+    prompt_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+
     prompt_topic = models.ForeignKey(PromptTopic, on_delete=models.CASCADE)
 
     name = models.CharField(unique=True, max_length=128)
