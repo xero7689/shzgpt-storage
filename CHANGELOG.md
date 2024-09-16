@@ -1,3 +1,10 @@
+## v0.3.1 (2024-09-16)
+
+### Fix
+
+- Enhance consumer logger for error logging
+- Chat admin page
+
 ## v0.3.0 (2024-09-16)
 
 ### Feat
