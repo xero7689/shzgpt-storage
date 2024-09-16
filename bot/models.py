@@ -23,7 +23,7 @@ class APIKey(models.Model):
     owner = models.ForeignKey("member.Member", on_delete=models.CASCADE)
     key = models.CharField(max_length=256)
     desc = models.CharField(max_length=256, blank=True)
-    model = models.ForeignKey(AIModel, on_delete=models.CASCADE, null=True)
+    vendor = models.ForeignKey(AIVendor, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name="Topic Created Date"
     )

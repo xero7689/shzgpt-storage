@@ -23,4 +23,4 @@ class AIModel(admin.ModelAdmin):
 
 @admin.register(APIKey)
 class APIKey(admin.ModelAdmin):
-    list_display = ["id", "owner", "model", "desc", "created_at"]
+    list_display = ["id", "owner", "vendor", "desc", "created_at"]
