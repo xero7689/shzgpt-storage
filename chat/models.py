@@ -1,6 +1,17 @@
 import uuid
 from django.db import models
 from django.utils import timezone
+from enum import Enum
+from bot.models import Bot
+
+
+class ChatRole(Enum):
+    USER = "user"
+    ASSISTANT = "assistant"
+
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
 
 
 class ChatRoom(models.Model):
@@ -23,7 +34,11 @@ class ChatRoom(models.Model):
 class Message(models.Model):
     message_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
-    role = models.CharField(max_length=32)
+    role = models.CharField(
+        max_length=32, choices=ChatRole.choices(), default=ChatRole.USER.value
+    )
+
+    role_id = models.UUIDField(null=True, blank=True, unique=True)
 
     content = models.TextField()
 
@@ -42,6 +57,12 @@ class Message(models.Model):
 
         # Call the original save() method to save the Chat object
         super(Message, self).save(*args, **kwargs)
+
+    def get_role_obj(self):
+        if self.role == ChatRole.USER.value:
+            return self.chatroom.owner
+        else:
+            return Bot.objects.get(bot_id=self.role_id)
 
 
 class PromptTopic(models.Model):
