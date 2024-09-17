@@ -71,6 +71,7 @@ class APIKey(models.Model):
 
 class Bot(models.Model):
     # Main fields
+    owner = models.ForeignKey("member.Member", on_delete=models.CASCADE)
     bot_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     name = models.CharField(max_length=255)
@@ -100,3 +101,8 @@ class Bot(models.Model):
         return self.ai_model.modalities.filter(
             input_type=input_type, output_type=output_type
         ).exists()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["bot_id"]),
+        ]
