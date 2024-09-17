@@ -104,5 +104,6 @@ class Bot(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=["bot_id"]),
+            models.Index(fields=["owner", "bot_id"]),
+            models.Index(fields=["owner", "ai_model"]),
         ]
