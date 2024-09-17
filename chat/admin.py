@@ -36,8 +36,20 @@ class ChatRoomAdmin(admin.ModelAdmin):
 
 
 @admin.register(Message)
-class ChatAdmin(admin.ModelAdmin):
-    list_display = ["id", "created_at", "chatroom", "role", "tokens", "content"]
+class MessageAdmin(admin.ModelAdmin):
+    list_display = [
+        "id",
+        "created_at",
+        "chatroom",
+        "role",
+        "role_id",
+        "role_obj_display",
+        "tokens",
+        "content",
+    ]
+
+    def role_obj_display(self, obj):
+        return obj.get_role_obj()
 
 
 @admin.register(PromptTopic)
