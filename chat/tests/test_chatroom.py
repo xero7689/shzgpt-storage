@@ -6,7 +6,6 @@ from rest_framework.test import APIClient
 
 from chat.models import ChatRoom
 
-
 User = get_user_model()
 
 

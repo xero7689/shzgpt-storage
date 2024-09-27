@@ -1,7 +1,9 @@
 import uuid
+from enum import Enum
+
 from django.db import models
 from django.utils import timezone
-from enum import Enum
+
 from bot.models import Bot
 
 

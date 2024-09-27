@@ -1,5 +1,5 @@
-from unittest.mock import MagicMock, patch
 from datetime import datetime
+from unittest.mock import MagicMock, patch
 
 import orjson
 from channels.testing import WebsocketCommunicator

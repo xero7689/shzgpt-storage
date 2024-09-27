@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from chat.models import Message, ChatRoom
+from chat.models import ChatRoom, Message
 
 User = get_user_model()
 
