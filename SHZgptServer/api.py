@@ -4,6 +4,8 @@ from ninja.renderers import BaseRenderer
 
 from member.api import router as member_router
 from member.api import LoginError, SignUpError
+from bot.api import bot_router, model_router, AIModelNotFound
+from chat.api import chatroom_router
 
 
 class ORJSONRenderer(BaseRenderer):
@@ -34,4 +36,12 @@ def signup_error(request, exc):
     )
 
 
+@api.exception_handler(AIModelNotFound)
+def ai_model_not_found(request, exc):
+    return api.create_response(request, {"message": "AI Model not found"}, status=404)
+
+
 api.add_router("/members", member_router)
+api.add_router("/models", model_router)
+api.add_router("/bots", bot_router)
+api.add_router("/chatrooms", chatroom_router)

@@ -1,19 +1,26 @@
 import logging
 from datetime import datetime
+import asyncio
 
 import orjson as json
 from channels.auth import login
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
+from shz_llm_client import OpenAIClient, RequestMessage
+import openai
+from pydantic import BaseModel
 
-from chat.models import Message, ChatRoom
 from bot.models import APIKey
+from chat.models import ChatRoom, Message
 from chat.schema import ChatContext, ChatRequest, ChatResponse, ChatRole, ChatStatus
 from common.tokenizer import num_tokens_from_message
-
-from shz_llm_client import OpenAIClient, RequestMessage
+from libs.crawler import fetch_website, parse_website_metadata
 
 logger = logging.getLogger(__name__)
+
+
+class URLExtractor(BaseModel):
+    urls: list[str]
 
 
 class AsyncChatConsumer(AsyncWebsocketConsumer):
@@ -55,11 +62,37 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
         # Query OpenAI API
         api_key = await self.get_api_key()
         recent_chat_messages = await self.get_recent_chat_messages(request)
-
-        client = OpenAIClient(api_key, model_id="gpt-4o-mini", stream=False)
         system_prompt = RequestMessage(
             role="system", content="You are a helpful assistant."
         )
+
+        # Chat Client
+        client = OpenAIClient(api_key, model_id="gpt-4o-mini", stream=False)
+
+        # Parse URL from the message
+        possible_urls = await self.parse_url_from_context(request.context.content)
+
+        # Use async gather to fetch multiple websites concurrently
+        if possible_urls:
+            tasks = [fetch_website(url) for url in possible_urls]
+            website_contents = await asyncio.gather(*tasks)
+
+            # Parse the website metadata
+            metadata = {
+                url: parse_website_metadata(content)
+                for url, content in website_contents
+            }
+
+            print(metadata)
+
+            addtional_url_context = "\n".join(
+                [
+                    f"URL: {url}\nTitle: {data['title']}\nSubtitle: {data['subtitle']}\nText: {data['text']}"
+                    for url, data in metadata.items()
+                ]
+            )
+
+            system_prompt.content += f"\n\nYou are going to answer user's question based on following addtional URL context:\n\n{addtional_url_context}"
 
         messages = []
         for message in recent_chat_messages[::-1]:
@@ -178,3 +211,25 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
         )
 
         return response
+
+    async def parse_url_from_context(self, context) -> list[str]:
+        # Helper Client for structured output
+        api_key = await self.get_api_key()
+        helper_client = openai.OpenAI(api_key=api_key)
+
+        # Try to fetch and parse website if user's message contains URL
+        completion = helper_client.beta.chat.completions.parse(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful URL extractor, you can extract URLs from text.",
+                },
+                {"role": "user", "content": context},
+            ],
+            response_format=URLExtractor,
+        )
+
+        message = completion.choices[0].message
+        if message.parsed:
+            return message.parsed.urls

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Message, ChatRoom, Prompt, PromptTopic
+from .models import ChatRoom, Message, Prompt, PromptTopic
 
 
 class MessageSerializer(serializers.ModelSerializer):

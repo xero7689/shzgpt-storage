@@ -6,9 +6,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from chat.models import Message, ChatRoom
+from chat.models import ChatRoom, Message
 from chat.serializers import MessageSerializer
-
 
 User = get_user_model()
 

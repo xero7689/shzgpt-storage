@@ -6,21 +6,24 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('bot', '0004_bot'),
+        ("bot", "0004_bot"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='bot',
-            name='owner',
-            field=models.ForeignKey(default=0, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="bot",
+            name="owner",
+            field=models.ForeignKey(
+                default=0,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
+            ),
             preserve_default=False,
         ),
         migrations.AddIndex(
-            model_name='bot',
-            index=models.Index(fields=['bot_id'], name='bot_bot_bot_id_d44bce_idx'),
+            model_name="bot",
+            index=models.Index(fields=["bot_id"], name="bot_bot_bot_id_d44bce_idx"),
         ),
     ]

@@ -4,20 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('chat', '0003_chatroom_chatroom_id_message_message_id_and_more'),
+        ("chat", "0003_chatroom_chatroom_id_message_message_id_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='message',
-            name='role_id',
+            model_name="message",
+            name="role_id",
             field=models.UUIDField(blank=True, null=True, unique=True),
         ),
         migrations.AlterField(
-            model_name='message',
-            name='role',
-            field=models.CharField(choices=[('user', 'USER'), ('assistant', 'ASSISTANT')], default='user', max_length=32),
+            model_name="message",
+            name="role",
+            field=models.CharField(
+                choices=[("user", "USER"), ("assistant", "ASSISTANT")],
+                default="user",
+                max_length=32,
+            ),
         ),
     ]
