@@ -1,3 +1,25 @@
+## v0.4.0 (2024-09-28)
+
+### Feat
+
+- Implement basic webcrawler for chat API
+
+### Fix
+
+- Add new chat Ninja API
+- Format import sorting using ruff
+- Add bs4 dependency
+- Implement basic chatroom API
+- Update migrations style
+- Implement basic bot, and AI model API
+- Update bot index
+- Add owner field to bot model and add bot_id to index
+- Add role_id to Message model and update the role field using enum value
+- Add bot model
+- Add modality and timestamp for each bot model
+- Add unique uuid to chat models
+- Replace model with vendor from API Key model
+
 ## v0.3.1 (2024-09-16)
 
 ### Fix
