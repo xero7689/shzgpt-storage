@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 from django.conf import settings
-from django.contrib.auth import authenticate, login, get_user_model
+from django.contrib.auth import authenticate, get_user_model, login
 from django.core.cache import cache
 from django.http import JsonResponse
 from django.utils import timezone
@@ -11,11 +11,11 @@ from rest_framework.response import Response
 from rest_framework.serializers import ReturnDict
 from rest_framework.views import APIView
 
-from .models import Message, ChatRoom, Prompt, PromptTopic
-from bot.serializers import APIKeySerializer
 from bot.models import APIKey
-
+from bot.serializers import APIKeySerializer
 from member.serializers import MemberSerializer
+
+from .models import ChatRoom, Message, Prompt, PromptTopic
 from .serializers import (
     ChatRoomSerializer,
     MessageSerializer,

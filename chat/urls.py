@@ -2,15 +2,15 @@ from django.urls import include, path
 
 from .views import (
     APIKeyView,
-    MessagesAPIView,
     ChatHistoryAPIView,
     ChatRoomAPIView,
-    MessageAPIView,
     ChatSocketInitView,
     ChatUserAPIView,
     CustomLogInView,
     CustomLogOutView,
     CustomSignUpView,
+    MessageAPIView,
+    MessagesAPIView,
     PromptAPIView,
     PromptTopicAPIView,
 )
