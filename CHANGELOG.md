@@ -1,3 +1,10 @@
+## v0.4.2 (2024-10-11)
+
+### Fix
+
+- Add missing migrations
+- Minor issue of logger
+
 ## v0.4.1 (2024-10-11)
 
 ### Fix
