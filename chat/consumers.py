@@ -155,7 +155,9 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
         while cur_recents_tokens >= 4096:
             removed_msg = messages.pop()
             cur_recents_tokens -= removed_msg["tokens"]
-            logger.debug(f"[get_recent_msg][too_many_tokens][remove] {removed_msg.id}")
+            logger.debug(
+                f"[get_recent_msg][too_many_tokens][remove] {removed_msg['id']}"
+            )
 
         return messages
 
