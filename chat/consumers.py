@@ -149,14 +149,15 @@ class AsyncChatConsumer(AsyncWebsocketConsumer):
         )
 
         # Check token's length
-        cur_recents_tokens = sum([message["tokens"] for message in recent_messages])
+        messages = [message for message in recent_messages]
+        cur_recents_tokens = sum([message["tokens"] for message in messages])
 
         while cur_recents_tokens >= 4096:
-            removed_msg = recent_messages.pop()
-            cur_recents_tokens -= removed_msg.tokens
+            removed_msg = messages.pop()
+            cur_recents_tokens -= removed_msg["tokens"]
             logger.debug(f"[get_recent_msg][too_many_tokens][remove] {removed_msg.id}")
 
-        return recent_messages
+        return messages
 
     @database_sync_to_async
     def save_request_chat_message(self, request):
