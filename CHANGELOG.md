@@ -1,3 +1,9 @@
+## v0.4.1 (2024-10-11)
+
+### Fix
+
+- Update consumer's get-recent-message logic
+
 ## v0.4.0 (2024-09-28)
 
 ### Feat

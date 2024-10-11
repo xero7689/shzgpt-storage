@@ -20,6 +20,7 @@ class ChatRoom(models.Model):
     chatroom_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     owner = models.ForeignKey("member.Member", on_delete=models.PROTECT)
     name = models.CharField(unique=True, max_length=128)
+    bots = models.ManyToManyField("bot.Bot", blank=True)
 
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name="Topic Created Date"
